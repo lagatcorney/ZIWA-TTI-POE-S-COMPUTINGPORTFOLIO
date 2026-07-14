@@ -45,7 +45,6 @@
             background-position: center, center;
             background-repeat: no-repeat, no-repeat;
             opacity: 0.85 !important;
-            /* Much more visible */
             animation: bgFade 30s ease-in-out infinite alternate;
         }
 
@@ -59,7 +58,6 @@
             height: 100%;
             z-index: -1;
             background: rgba(0, 0, 0, 0.04) !important;
-            /* Extremely subtle dark overlay */
         }
 
         @keyframes bgFade {
@@ -86,15 +84,12 @@
             margin: -15px;
             padding: 20px;
             background: rgba(0, 0, 0, 0.02) !important;
-            /* Almost transparent */
             backdrop-filter: none !important;
         }
 
         .login-box {
             background: rgba(255, 255, 255, 0.55) !important;
-            /* More transparent */
             backdrop-filter: blur(6px);
-            /* Light blur for readability */
             padding: 40px;
             border-radius: 16px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
@@ -200,7 +195,6 @@
             display: flex;
             flex-direction: column;
             background: rgba(255, 255, 255, 0.55) !important;
-            /* Very transparent */
             border-radius: 16px;
             padding: 20px;
             backdrop-filter: none !important;
@@ -212,7 +206,6 @@
             justify-content: space-between;
             align-items: center;
             background: rgba(0, 51, 102, 0.75) !important;
-            /* Transparent header */
             padding: 15px 25px;
             border-radius: 10px;
             margin-bottom: 20px;
@@ -1514,11 +1507,11 @@
         <div class="login-box">
             <h1>📚 C&I Trainee E-Portfolio Manager</h1>
             <p class="subtitle">Sign in to access your dashboard</p>
-            <form id="loginForm" onsubmit="handleLogin(event)">
+            <form id="loginForm" onsubmit="handleLogin(event)" autocomplete="off">
                 <label for="loginEmail">Email</label>
-                <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                <input type="email" id="loginEmail" placeholder="Enter your email" required autocomplete="off">
                 <label for="loginPassword">Password</label>
-                <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                <input type="password" id="loginPassword" placeholder="Enter your password" required autocomplete="new-password">
                 <label for="loginRole">Select Role</label>
                 <select id="loginRole">
                     <option value="admin">Admin</option>
