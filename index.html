@@ -13,58 +13,111 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js">
     </script>
     <style>
-        /* ===== ALL STYLES ===== */
+        /* ===== BASE STYLES WITH MAXIMUM BACKGROUND VISIBILITY ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
         }
+
         html,
         body {
             height: 100%;
-            background: #f4f7fc;
             padding: 15px;
             overflow-y: auto;
-        }
-        .container {
-            max-width: 1400px;
-            margin: auto;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
+            min-height: 100vh;
         }
 
-        /* ===== LOGIN PAGE ===== */
+        /* ===== MAIN BACKGROUND IMAGE - FULL VISIBILITY ===== */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background-image:
+                url('https://www.ziwatti.ac.ke/uploads/frontend/home_page/wellcome1.jpeg'),
+                url('https://www.ziwatti.ac.ke/uploads/frontend/gallery/gallery-1760516008.jpg');
+            background-size: cover, cover;
+            background-position: center, center;
+            background-repeat: no-repeat, no-repeat;
+            opacity: 0.85 !important;
+            /* Much more visible */
+            animation: bgFade 30s ease-in-out infinite alternate;
+        }
+
+        /* ===== MINIMAL OVERLAY - ALMOST TRANSPARENT ===== */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: rgba(0, 0, 0, 0.04) !important;
+            /* Extremely subtle dark overlay */
+        }
+
+        @keyframes bgFade {
+            0% {
+                opacity: 0.75;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.95;
+                transform: scale(1.02);
+            }
+            100% {
+                opacity: 0.80;
+                transform: scale(1);
+            }
+        }
+
+        /* ===== LOGIN PAGE - CLEAR BACKGROUND VISIBLE ===== */
         #loginPage {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: linear-gradient(135deg, #003366, #1a73e8);
             margin: -15px;
             padding: 20px;
+            background: rgba(0, 0, 0, 0.02) !important;
+            /* Almost transparent */
+            backdrop-filter: none !important;
         }
+
         .login-box {
-            background: white;
+            background: rgba(255, 255, 255, 0.55) !important;
+            /* More transparent */
+            backdrop-filter: blur(6px);
+            /* Light blur for readability */
             padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
             width: 100%;
             max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
         }
+
         .login-box h1 {
             color: #003366;
             text-align: center;
             margin-bottom: 10px;
             font-size: 28px;
+            text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5);
         }
+
         .login-box .subtitle {
             text-align: center;
-            color: #666;
+            color: #444;
             margin-bottom: 30px;
             font-size: 14px;
         }
+
         .login-box label {
             display: block;
             font-weight: bold;
@@ -72,21 +125,26 @@
             margin-bottom: 5px;
             font-size: 14px;
         }
+
         .login-box input,
         .login-box select {
             width: 100%;
             padding: 12px 15px;
-            border: 2px solid #ddd;
+            border: 1px solid rgba(200, 200, 200, 0.4);
             border-radius: 6px;
             font-size: 14px;
             margin-bottom: 15px;
             transition: border-color 0.3s;
+            background: rgba(255, 255, 255, 0.75);
         }
+
         .login-box input:focus,
         .login-box select:focus {
             outline: none;
             border-color: #1a73e8;
+            background: rgba(255, 255, 255, 0.9);
         }
+
         .login-btn {
             width: 100%;
             padding: 12px;
@@ -99,9 +157,11 @@
             cursor: pointer;
             transition: background 0.3s;
         }
+
         .login-btn:hover {
             background: #1a73e8;
         }
+
         .login-error {
             color: #dc3545;
             text-align: center;
@@ -109,54 +169,65 @@
             font-size: 14px;
             display: none;
         }
+
         .powered-by {
             text-align: center;
             margin-top: 15px;
             padding-top: 15px;
-            border-top: 1px solid #e9ecef;
+            border-top: 1px solid rgba(233, 236, 239, 0.4);
             font-size: 12px;
-            color: #999;
+            color: #666;
         }
+
         .powered-by strong {
             color: #1a73e8;
         }
-        .app-footer {
-            text-align: center;
-            margin-top: 20px;
-            padding: 15px;
-            border-top: 1px solid #ddd;
-            font-size: 12px;
-            color: #999;
-        }
-        .app-footer strong {
-            color: #1a73e8;
-        }
 
-        /* ===== MAIN APP ===== */
+        /* ===== MAIN APP - HIGHLY TRANSPARENT CONTAINERS ===== */
         #appPage {
             display: none;
             height: 100%;
         }
+
         #appPage.active {
             display: block;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.55) !important;
+            /* Very transparent */
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: none !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
         }
 
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #003366;
+            background: rgba(0, 51, 102, 0.75) !important;
+            /* Transparent header */
             padding: 15px 25px;
             border-radius: 10px;
             margin-bottom: 20px;
             flex-wrap: wrap;
             gap: 15px;
+            backdrop-filter: none !important;
         }
+
         .header h1 {
             color: white;
             font-size: 24px;
             margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
+
         .header .user-info {
             color: white;
             font-size: 14px;
@@ -164,12 +235,14 @@
             align-items: center;
             gap: 15px;
         }
+
         .header .user-info .role-badge {
             background: rgba(255, 255, 255, 0.2);
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
         }
+
         .logout-btn {
             padding: 8px 16px;
             background: #dc3545;
@@ -180,15 +253,18 @@
             font-weight: bold;
             transition: 0.3s;
         }
+
         .logout-btn:hover {
             background: #c82333;
             transform: scale(1.05);
         }
+
         .nav-buttons {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
+
         .nav-btn {
             padding: 10px 20px;
             border: none;
@@ -196,60 +272,76 @@
             cursor: pointer;
             font-weight: bold;
             color: white;
-            background: #1a73e8;
+            background: rgba(26, 115, 232, 0.85);
             transition: all 0.3s;
             font-size: 14px;
         }
+
         .nav-btn:hover {
             transform: scale(1.05);
-            background: #1557b0;
+            background: rgba(21, 87, 176, 0.95);
         }
+
         .nav-btn.portfolio {
-            background: #28a745;
+            background: rgba(40, 167, 69, 0.85);
         }
+
         .nav-btn.portfolio:hover {
-            background: #1e7e34;
+            background: rgba(30, 126, 52, 0.95);
         }
+
         .nav-btn.add-student {
-            background: #ff9800;
+            background: rgba(255, 152, 0, 0.85);
         }
+
         .nav-btn.add-student:hover {
-            background: #e68900;
+            background: rgba(230, 137, 0, 0.95);
         }
+
         .nav-btn.export-btn {
-            background: #6c757d;
+            background: rgba(108, 117, 125, 0.85);
         }
+
         .nav-btn.export-btn:hover {
-            background: #5a6268;
+            background: rgba(90, 98, 104, 0.95);
         }
+
         .nav-btn.users-btn {
-            background: #9c27b0;
+            background: rgba(156, 39, 176, 0.85);
         }
+
         .nav-btn.users-btn:hover {
-            background: #7b1fa2;
+            background: rgba(123, 31, 162, 0.95);
         }
+
         .nav-btn.trainer-portfolios-btn {
-            background: #00bcd4;
+            background: rgba(0, 188, 212, 0.85);
         }
+
         .nav-btn.trainer-portfolios-btn:hover {
-            background: #0097a7;
+            background: rgba(0, 151, 167, 0.95);
         }
+
         .nav-btn.add-unit {
-            background: #8bc34a;
+            background: rgba(139, 195, 74, 0.85);
         }
+
         .nav-btn.add-unit:hover {
-            background: #689f38;
+            background: rgba(104, 159, 56, 0.95);
         }
+
         .nav-btn.assign-trainer {
-            background: #ff5722;
+            background: rgba(255, 87, 34, 0.85);
         }
+
         .nav-btn.assign-trainer:hover {
-            background: #e64a19;
+            background: rgba(230, 74, 25, 0.95);
         }
 
         .trainer-view .course-selector select option:not(.trainer-assigned) {
             display: none !important;
         }
+
         .trainer-view .nav-btn.add-student,
         .trainer-view .nav-btn.export-btn,
         .trainer-view .nav-btn.users-btn,
@@ -262,12 +354,15 @@
         .trainer-view .btn-delete-unit {
             display: none !important;
         }
+
         .trainer-view .add-student-form {
             display: none !important;
         }
+
         .trainer-view .add-unit-form {
             display: none !important;
         }
+
         .trainer-view .student div:last-child {
             justify-content: center !important;
         }
@@ -276,16 +371,18 @@
             display: none !important;
         }
 
+        /* ===== COURSE SELECTOR ===== */
         .course-selector {
             text-align: center;
             margin-bottom: 20px;
         }
+
         .course-selector select {
             padding: 12px 24px;
             font-size: 16px;
             border-radius: 8px;
-            border: 2px solid #1a73e8;
-            background: white;
+            border: 1px solid rgba(26, 115, 232, 0.3);
+            background: rgba(255, 255, 255, 0.7);
             font-weight: bold;
             color: #003366;
             cursor: pointer;
@@ -293,27 +390,36 @@
             width: 100%;
             max-width: 500px;
         }
+
         .course-container {
             display: none;
             flex: 1;
             overflow-y: auto;
+            background: rgba(255, 255, 255, 0.60) !important;
+            border-radius: 12px;
+            padding: 15px;
+            backdrop-filter: none !important;
         }
+
         .course-container.active {
             display: block;
         }
+
+        /* ===== LEGACY SECTIONS - TRANSPARENT ===== */
         .legacy-section {
-            background: #fff;
+            background: rgba(255, 255, 255, 0.70);
             margin-bottom: 15px;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, .12);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
+
         .legacy-header {
             padding: 15px 20px;
             font-size: 17px;
             font-weight: bold;
             cursor: pointer;
-            background: #6c757d;
+            background: rgba(108, 117, 125, 0.8);
             color: #fff;
             transition: background 0.3s;
             display: flex;
@@ -321,82 +427,99 @@
             align-items: center;
             user-select: none;
         }
+
         .legacy-header:hover {
-            background: #5a6268;
+            background: rgba(90, 98, 104, 0.85);
         }
+
         .legacy-header .count {
             font-size: 14px;
             font-weight: normal;
             color: #ffff99;
             margin-left: 10px;
         }
+
         .legacy-header .arrow {
             font-size: 14px;
             transition: transform 0.3s;
         }
+
         .legacy-header .arrow.collapsed {
             transform: rotate(-90deg);
         }
+
         .legacy-content {
             padding: 15px 20px;
             max-height: 800px;
             overflow-y: auto;
             transition: max-height 0.3s ease;
+            background: rgba(255, 255, 255, 0.70);
         }
+
         .legacy-content.collapsed {
             max-height: 0;
             padding: 0 20px;
             overflow: hidden;
         }
+
         details {
-            background: #fff;
+            background: rgba(255, 255, 255, 0.70);
             margin-bottom: 15px;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, .12);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
+
         summary {
             padding: 15px 20px;
             font-size: 17px;
             font-weight: bold;
             cursor: pointer;
-            background: #1a73e8;
+            background: rgba(26, 115, 232, 0.8);
             color: #fff;
             transition: background 0.3s;
         }
+
         summary:hover {
-            background: #1557b0;
+            background: rgba(21, 87, 176, 0.85);
         }
+
         .content {
             padding: 15px 20px;
             max-height: 400px;
             overflow-y: auto;
+            background: rgba(255, 255, 255, 0.70);
         }
+
         .student {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 12px 15px;
             margin-bottom: 10px;
-            background: #f9f9f9;
+            background: rgba(249, 249, 249, 0.75);
             border-radius: 6px;
             border-left: 5px solid #1a73e8;
             flex-wrap: wrap;
             gap: 10px;
             transition: background 0.2s;
         }
+
         .student:hover {
-            background: #eef5ff;
+            background: rgba(238, 245, 255, 0.85);
         }
+
         .student-info {
             display: flex;
             align-items: center;
             gap: 15px;
             flex-wrap: wrap;
         }
+
         .student-info strong {
             color: #003366;
         }
+
         .student div:last-child {
             display: flex;
             gap: 8px;
@@ -404,60 +527,68 @@
         }
 
         .units-section {
-            background: #f8f9fa;
+            background: rgba(248, 249, 250, 0.75);
             padding: 10px 15px;
             margin: 10px 0;
             border-radius: 6px;
             border-left: 4px solid #8bc34a;
         }
+
         .units-section h4 {
             color: #003366;
             margin-bottom: 8px;
             font-size: 14px;
         }
+
         .unit-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 6px 10px;
             margin: 4px 0;
-            background: white;
+            background: rgba(255, 255, 255, 0.75);
             border-radius: 4px;
             border-left: 3px solid #8bc34a;
             flex-wrap: wrap;
             gap: 8px;
         }
+
         .unit-item .unit-name {
             font-size: 13px;
             color: #333;
         }
+
         .unit-item .unit-code {
             font-size: 12px;
             color: #666;
-            background: #e9ecef;
+            background: rgba(233, 236, 239, 0.7);
             padding: 2px 8px;
             border-radius: 10px;
         }
+
         .btn-delete-unit {
             background: #dc3545;
             padding: 4px 10px;
             font-size: 11px;
         }
+
         .btn-delete-unit:hover {
             background: #c82333;
         }
 
         .add-unit-form {
-            background: white;
+            background: rgba(255, 255, 255, 0.75);
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
             display: none;
         }
+
         .add-unit-form.active {
             display: block;
         }
+
         .add-unit-form h3 {
             color: #003366;
             margin-bottom: 15px;
@@ -473,74 +604,97 @@
             transition: all .3s;
             font-size: 0.85rem;
         }
+
         button:hover {
             transform: scale(1.05);
         }
+
         button:disabled {
             background: #999 !important;
             cursor: not-allowed;
             transform: none;
         }
+
         .btn-portfolio {
             background: #ff9800;
         }
+
         .btn-portfolio:hover {
             background: #e68900;
         }
+
         .btn-delete {
             background: #dc3545;
         }
+
         .btn-delete:hover {
             background: #c82333;
         }
+
         .btn-edit {
             background: #17a2b8;
         }
+
         .btn-edit:hover {
             background: #138496;
         }
+
         .btn-registered {
             background: #28a745;
         }
+
         .btn-registered:hover {
             background: #1e7e34;
         }
+
         .btn-not-registered {
             background: #dc3545;
         }
+
         .btn-not-registered:hover {
             background: #c82333;
         }
+
         .btn-view-trainer {
             background: #00bcd4;
         }
+
         .btn-view-trainer:hover {
             background: #0097a7;
         }
+
         .btn-view-portfolio-link {
             background: #9c27b0;
         }
+
         .btn-view-portfolio-link:hover {
             background: #7b1fa2;
         }
+
         .btn-add-unit-action {
             background: #8bc34a;
         }
+
         .btn-add-unit-action:hover {
             background: #689f38;
         }
+
         .btn-assign {
             background: #ff5722;
         }
+
         .btn-assign:hover {
             background: #e64a19;
         }
+
         .btn-remove-assign {
             background: #dc3545;
         }
+
         .btn-remove-assign:hover {
             background: #c82333;
         }
+
         .count {
             font-size: 14px;
             font-weight: normal;
@@ -549,41 +703,49 @@
         }
 
         .add-student-form {
-            background: white;
+            background: rgba(255, 255, 255, 0.75);
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
             display: none;
         }
+
         .add-student-form.active {
             display: block;
         }
+
         .add-student-form h3 {
             color: #003366;
             margin-bottom: 15px;
         }
+
         .form-group {
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
             align-items: center;
         }
+
         .form-group input,
         .form-group select {
             padding: 10px 15px;
-            border: 2px solid #ddd;
+            border: 1px solid rgba(200, 200, 200, 0.3);
             border-radius: 6px;
             font-size: 14px;
             flex: 1;
             min-width: 150px;
             transition: border-color 0.3s;
+            background: rgba(255, 255, 255, 0.7);
         }
+
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
             border-color: #1a73e8;
+            background: rgba(255, 255, 255, 0.9);
         }
+
         .form-group button {
             padding: 10px 25px;
             background: #28a745;
@@ -594,14 +756,18 @@
             cursor: pointer;
             transition: 0.3s;
         }
+
         .form-group button:hover {
             background: #1e7e34;
             transform: scale(1.05);
         }
+
         .form-group .portfolio-link-input {
             flex: 2;
             min-width: 250px;
         }
+
+        /* ===== MODALS - CLEAN ===== */
         .modal {
             display: none;
             position: fixed;
@@ -610,19 +776,23 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: rgba(0, 0, 0, 0.4);
             overflow: auto;
+            backdrop-filter: blur(2px);
         }
+
         .modal-content {
-            background-color: #fefefe;
+            background: rgba(255, 255, 255, 0.85);
             margin: 5% auto;
             padding: 30px;
             border-radius: 12px;
             width: 90%;
             max-width: 800px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
             animation: slideDown 0.3s ease;
+            position: relative;
         }
+
         @keyframes slideDown {
             from {
                 opacity: 0;
@@ -633,6 +803,22 @@
                 transform: translateY(0);
             }
         }
+
+        .modal-content .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .modal-content .close:hover {
+            color: #000;
+        }
+
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -640,33 +826,29 @@
             margin-bottom: 20px;
             border-bottom: 2px solid #1a73e8;
             padding-bottom: 15px;
+            padding-right: 40px;
         }
+
         .modal-header h2 {
             color: #003366;
         }
-        .close {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .close:hover {
-            color: #000;
-        }
+
         .portfolio-detail {
             padding: 10px 0;
         }
+
         .portfolio-detail p {
             margin: 10px 0;
             font-size: 16px;
             line-height: 1.6;
         }
+
         .portfolio-detail strong {
             color: #003366;
             display: inline-block;
             min-width: 120px;
         }
+
         .portfolio-link-btn {
             display: inline-block;
             padding: 8px 16px;
@@ -677,55 +859,84 @@
             font-weight: bold;
             transition: 0.3s;
         }
+
         .portfolio-link-btn:hover {
             background: #7b1fa2;
             transform: scale(1.05);
         }
+
         .data-status {
             text-align: center;
             font-size: 12px;
             color: #6c757d;
             margin-top: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 5px;
+            border-radius: 6px;
         }
 
+        .app-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            border-top: 1px solid rgba(200, 200, 200, 0.3);
+            font-size: 12px;
+            color: #666;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 8px;
+        }
+
+        .app-footer strong {
+            color: #1a73e8;
+        }
+
+        /* ===== TABLES ===== */
         .users-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
         }
+
         .users-table th,
         .users-table td {
             padding: 12px 15px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid rgba(200, 200, 200, 0.3);
         }
+
         .users-table th {
-            background: #003366;
+            background: rgba(0, 51, 102, 0.85);
             color: white;
             font-weight: bold;
         }
+
         .users-table tr:hover {
-            background: #f5f5f5;
+            background: rgba(245, 245, 245, 0.6);
         }
+
         .users-table .actions {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
         }
+
         .users-table .btn-sm {
             padding: 5px 12px;
             font-size: 12px;
         }
+
         .status-badge {
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
         }
+
         .status-badge.active {
             background: #28a745;
             color: white;
         }
+
         .status-badge.inactive {
             background: #dc3545;
             color: white;
@@ -736,20 +947,24 @@
             border-collapse: collapse;
             margin-top: 15px;
         }
+
         .trainer-portfolios-table th,
         .trainer-portfolios-table td {
             padding: 12px 15px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid rgba(200, 200, 200, 0.3);
         }
+
         .trainer-portfolios-table th {
-            background: #003366;
+            background: rgba(0, 51, 102, 0.85);
             color: white;
             font-weight: bold;
         }
+
         .trainer-portfolios-table tr:hover {
-            background: #f5f5f5;
+            background: rgba(245, 245, 245, 0.6);
         }
+
         .trainer-portfolios-table .student-count {
             background: #1a73e8;
             color: white;
@@ -763,20 +978,24 @@
             border-collapse: collapse;
             margin-top: 15px;
         }
+
         .assignment-table th,
         .assignment-table td {
             padding: 10px 12px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid rgba(200, 200, 200, 0.3);
         }
+
         .assignment-table th {
-            background: #003366;
+            background: rgba(0, 51, 102, 0.85);
             color: white;
             font-weight: bold;
         }
+
         .assignment-table tr:hover {
-            background: #f5f5f5;
+            background: rgba(245, 245, 245, 0.6);
         }
+
         .assignment-table .module-badge {
             background: #1a73e8;
             color: white;
@@ -794,6 +1013,7 @@
             font-weight: bold;
             margin-left: 8px;
         }
+
         .stalled-badge {
             background: #dc3545;
             color: white;
@@ -802,19 +1022,22 @@
             font-size: 11px;
             margin-left: 6px;
         }
+
         .trainer-digest {
-            background: #e8f0fe;
+            background: rgba(232, 240, 254, 0.75);
             padding: 10px 15px;
             border-radius: 8px;
             margin-bottom: 15px;
             font-size: 14px;
             border-left: 4px solid #1a73e8;
         }
+
         .trainer-digest strong {
             color: #003366;
         }
+
         .in-app-banner {
-            background: #fff3cd;
+            background: rgba(255, 243, 205, 0.85);
             border-left: 4px solid #ffc107;
             padding: 10px 15px;
             margin-bottom: 15px;
@@ -822,6 +1045,7 @@
             font-size: 14px;
             display: none;
         }
+
         .in-app-banner.show {
             display: block;
         }
@@ -829,27 +1053,22 @@
         .assignment-detail {
             font-size: 13px;
             color: #333;
-            background: #f0f4f8;
+            background: rgba(240, 244, 248, 0.7);
             padding: 6px 12px;
             border-radius: 4px;
             margin: 2px 0;
         }
+
         .assignment-detail strong {
             color: #003366;
         }
 
-        /* import/export styling */
-        .import-export-options {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
         .file-input-wrapper {
             position: relative;
             overflow: hidden;
             display: inline-block;
         }
+
         .file-input-wrapper input[type=file] {
             position: absolute;
             left: 0;
@@ -860,26 +1079,30 @@
             cursor: pointer;
         }
 
-        /* ===== TRAINER DASHBOARD STYLES ===== */
+        /* ===== TRAINER DASHBOARD - TRANSPARENT ===== */
         .trainer-dashboard {
-            background: #fff;
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.65);
+            border-radius: 12px;
             padding: 0;
             margin-bottom: 25px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
             overflow: hidden;
+            backdrop-filter: none !important;
         }
+
         .trainer-dashboard .dashboard-header {
-            background: linear-gradient(135deg, #003366, #1a4a7a);
+            background: linear-gradient(135deg, rgba(0, 51, 102, 0.8), rgba(26, 74, 122, 0.8));
             color: white;
             padding: 20px 25px;
         }
+
         .trainer-dashboard .dashboard-header h2 {
             font-size: 22px;
             margin-bottom: 5px;
         }
+
         .trainer-dashboard .dashboard-header p {
-            opacity: 0.8;
+            opacity: 0.85;
             font-size: 14px;
         }
 
@@ -888,21 +1111,24 @@
             grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 15px;
             padding: 20px 25px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
+            background: rgba(248, 249, 250, 0.6);
+            border-bottom: 1px solid rgba(233, 236, 239, 0.3);
         }
+
         .trainer-dashboard .stat-card {
-            background: white;
+            background: rgba(255, 255, 255, 0.7);
             padding: 15px 20px;
             border-radius: 8px;
             text-align: center;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
         }
+
         .trainer-dashboard .stat-card .number {
             font-size: 28px;
             font-weight: bold;
             color: #003366;
         }
+
         .trainer-dashboard .stat-card .label {
             font-size: 13px;
             color: #666;
@@ -912,6 +1138,7 @@
         .trainer-dashboard .courses-section {
             padding: 20px 25px;
         }
+
         .trainer-dashboard .courses-section h3 {
             color: #003366;
             font-size: 18px;
@@ -919,18 +1146,20 @@
         }
 
         .trainer-course-card {
-            background: #f8f9fa;
+            background: rgba(248, 249, 250, 0.7);
             border-radius: 8px;
             margin-bottom: 12px;
-            border: 1px solid #e9ecef;
+            border: 1px solid rgba(233, 236, 239, 0.4);
             overflow: hidden;
             transition: box-shadow 0.2s;
         }
+
         .trainer-course-card:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
+
         .trainer-course-card .course-head {
-            background: #003366;
+            background: rgba(0, 51, 102, 0.85);
             color: white;
             padding: 12px 18px;
             font-weight: 600;
@@ -942,20 +1171,24 @@
             user-select: none;
             transition: background 0.2s;
         }
+
         .trainer-course-card .course-head:hover {
-            background: #1a4a7a;
+            background: rgba(26, 74, 122, 0.9);
         }
+
         .trainer-course-card .course-head .course-badge {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             padding: 2px 14px;
             border-radius: 12px;
             font-size: 13px;
             font-weight: normal;
         }
+
         .trainer-course-card .course-head .arrow-icon {
             transition: transform 0.3s;
             font-size: 14px;
         }
+
         .trainer-course-card .course-head .arrow-icon.open {
             transform: rotate(90deg);
         }
@@ -966,20 +1199,22 @@
             overflow: hidden;
             transition: max-height 0.4s ease, padding 0.3s ease;
         }
+
         .trainer-course-card .course-body.open {
             max-height: 5000px;
             padding: 15px 18px;
         }
 
         .trainer-module-block {
-            background: white;
+            background: rgba(255, 255, 255, 0.7);
             border-radius: 6px;
             margin-bottom: 10px;
-            border: 1px solid #e9ecef;
+            border: 1px solid rgba(233, 236, 239, 0.3);
             overflow: hidden;
         }
+
         .trainer-module-block .module-head {
-            background: #e8f0fe;
+            background: rgba(232, 240, 254, 0.75);
             padding: 8px 14px;
             font-weight: 600;
             color: #003366;
@@ -990,9 +1225,11 @@
             user-select: none;
             transition: background 0.2s;
         }
+
         .trainer-module-block .module-head:hover {
-            background: #d4e2f5;
+            background: rgba(212, 226, 245, 0.8);
         }
+
         .trainer-module-block .module-head .module-badge {
             background: #1a73e8;
             color: white;
@@ -1001,10 +1238,12 @@
             font-size: 12px;
             font-weight: normal;
         }
+
         .trainer-module-block .module-head .arrow-icon {
             transition: transform 0.3s;
             font-size: 12px;
         }
+
         .trainer-module-block .module-head .arrow-icon.open {
             transform: rotate(90deg);
         }
@@ -1015,13 +1254,14 @@
             overflow: hidden;
             transition: max-height 0.3s ease, padding 0.3s ease;
         }
+
         .trainer-module-block .module-body.open {
             max-height: 3000px;
             padding: 10px 14px;
         }
 
         .trainer-unit-row {
-            background: #f8f9fa;
+            background: rgba(248, 249, 250, 0.7);
             padding: 6px 12px;
             margin: 4px 0;
             border-radius: 4px;
@@ -1033,14 +1273,17 @@
             flex-wrap: wrap;
             gap: 6px;
         }
+
         .trainer-unit-row .unit-code {
             font-weight: 600;
             color: #003366;
         }
+
         .trainer-unit-row .unit-name {
             color: #333;
             flex: 1;
         }
+
         .trainer-unit-row .unit-student-count {
             background: #1a73e8;
             color: white;
@@ -1050,6 +1293,7 @@
             cursor: pointer;
             transition: background 0.2s;
         }
+
         .trainer-unit-row .unit-student-count:hover {
             background: #1557b0;
         }
@@ -1060,7 +1304,7 @@
             align-items: center;
             padding: 5px 10px;
             margin: 3px 0;
-            background: #fff;
+            background: rgba(255, 255, 255, 0.75);
             border-radius: 3px;
             border-left: 2px solid #1a73e8;
             flex-wrap: wrap;
@@ -1068,22 +1312,27 @@
             font-size: 13px;
             transition: background 0.2s;
         }
+
         .trainer-student-item:hover {
-            background: #f0f4f8;
+            background: rgba(240, 244, 248, 0.8);
         }
+
         .trainer-student-item .student-name {
             font-weight: 500;
             color: #003366;
         }
+
         .trainer-student-item .student-id {
             color: #666;
             font-size: 12px;
         }
+
         .trainer-student-item .student-actions {
             display: flex;
             gap: 5px;
             flex-wrap: wrap;
         }
+
         .trainer-student-item .student-actions .btn-sm {
             padding: 2px 10px;
             font-size: 11px;
@@ -1098,11 +1347,13 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.6);
+            background-color: rgba(0, 0, 0, 0.4);
             overflow: auto;
+            backdrop-filter: blur(2px);
         }
+
         .student-popup .popup-content {
-            background: #fff;
+            background: rgba(255, 255, 255, 0.88);
             margin: 5% auto;
             padding: 25px;
             border-radius: 12px;
@@ -1110,9 +1361,10 @@
             max-width: 700px;
             max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.2);
             animation: slideDown 0.3s ease;
         }
+
         .student-popup .popup-header {
             display: flex;
             justify-content: space-between;
@@ -1121,10 +1373,12 @@
             padding-bottom: 12px;
             margin-bottom: 15px;
         }
+
         .student-popup .popup-header h3 {
             color: #003366;
             font-size: 18px;
         }
+
         .student-popup .popup-close {
             color: #aaa;
             font-size: 28px;
@@ -1132,88 +1386,46 @@
             cursor: pointer;
             transition: 0.3s;
         }
+
         .student-popup .popup-close:hover {
             color: #000;
         }
+
         .student-popup .student-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 8px 12px;
             margin: 4px 0;
-            background: #f9f9f9;
+            background: rgba(249, 249, 249, 0.75);
             border-radius: 4px;
             border-left: 3px solid #1a73e8;
             flex-wrap: wrap;
             gap: 8px;
         }
+
         .student-popup .student-row:hover {
-            background: #eef5ff;
+            background: rgba(238, 245, 255, 0.8);
         }
+
         .student-popup .student-row .student-info {
             font-size: 14px;
         }
+
         .student-popup .student-row .student-info strong {
             color: #003366;
         }
+
         .student-popup .student-row .student-info small {
             color: #666;
             font-size: 12px;
             margin-left: 6px;
         }
+
         .student-popup .student-row .student-actions {
             display: flex;
             gap: 6px;
             flex-wrap: wrap;
-        }
-
-        /* ===== FIXED: MODAL OVERLAY - NO CLOSE ON BACKGROUND CLICK ===== */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            overflow: auto;
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 800px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-            animation: slideDown 0.3s ease;
-            position: relative;
-        }
-        .modal-content .close {
-            position: absolute;
-            right: 20px;
-            top: 15px;
-            font-size: 28px;
-            font-weight: bold;
-            color: #aaa;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .modal-content .close:hover {
-            color: #000;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #1a73e8;
-            padding-bottom: 15px;
-            padding-right: 40px;
-        }
-        .modal-header h2 {
-            color: #003366;
         }
 
         @media (max-width: 768px) {
@@ -1450,11 +1662,11 @@
                 </div>
                 <div id="userModalBody">
                     <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                        <input type="text" id="newUserEmail" placeholder="Email" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:1;min-width:150px;">
-                        <input type="text" id="newUserName" placeholder="Full Name" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:1;min-width:150px;">
-                        <input type="password" id="newUserPassword" placeholder="Password" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:1;min-width:150px;">
-                        <input type="text" id="newUserPortfolioLink" placeholder="Trainer Portfolio Link (optional)" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:2;min-width:200px;">
-                        <select id="newUserRole" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:1;min-width:120px;">
+                        <input type="text" id="newUserEmail" placeholder="Email" style="padding:10px 15px;border:1px solid rgba(200,200,200,0.3);border-radius:6px;flex:1;min-width:150px;background:rgba(255,255,255,0.7);">
+                        <input type="text" id="newUserName" placeholder="Full Name" style="padding:10px 15px;border:1px solid rgba(200,200,200,0.3);border-radius:6px;flex:1;min-width:150px;background:rgba(255,255,255,0.7);">
+                        <input type="password" id="newUserPassword" placeholder="Password" style="padding:10px 15px;border:1px solid rgba(200,200,200,0.3);border-radius:6px;flex:1;min-width:150px;background:rgba(255,255,255,0.7);">
+                        <input type="text" id="newUserPortfolioLink" placeholder="Trainer Portfolio Link (optional)" style="padding:10px 15px;border:1px solid rgba(200,200,200,0.3);border-radius:6px;flex:2;min-width:200px;background:rgba(255,255,255,0.7);">
+                        <select id="newUserRole" style="padding:10px 15px;border:1px solid rgba(200,200,200,0.3);border-radius:6px;flex:1;min-width:120px;background:rgba(255,255,255,0.7);">
                             <option value="hod">HOD</option>
                             <option value="trainer">Trainer</option>
                         </select>
@@ -1515,10 +1727,10 @@
                 <div id="assignmentBody">
                     <div style="margin-bottom: 15px; color: #666; font-size: 14px;">Select a trainer and assign them to specific courses, modules, and units.</div>
                     <div style="margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
-                        <select id="assignmentTrainer" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:1;min-width:200px;">
+                        <select id="assignmentTrainer" style="padding:10px 15px;border:1px solid rgba(200,200,200,0.3);border-radius:6px;flex:1;min-width:200px;background:rgba(255,255,255,0.7);">
                             <option value="">Select Trainer</option>
                         </select>
-                        <select id="assignmentCourse" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:1;min-width:200px;">
+                        <select id="assignmentCourse" style="padding:10px 15px;border:1px solid rgba(200,200,200,0.3);border-radius:6px;flex:1;min-width:200px;background:rgba(255,255,255,0.7);">
                             <option value="">Select Course</option>
                             <option value="ict6">ICT Technician Level 6</option>
                             <option value="ict5">ICT Technician Level 5</option>
@@ -1530,7 +1742,7 @@
                             <option value="lib5">Library and Information Science Level 5</option>
                             <option value="journal6">Digital Journalism and Reporting Level 6</option>
                         </select>
-                        <select id="assignmentModule" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:1;min-width:150px;">
+                        <select id="assignmentModule" style="padding:10px 15px;border:1px solid rgba(200,200,200,0.3);border-radius:6px;flex:1;min-width:150px;background:rgba(255,255,255,0.7);">
                             <option value="all">All Modules</option>
                             <option value="1">Module 1</option>
                             <option value="2">Module 2</option>
@@ -1540,7 +1752,7 @@
                             <option value="6">Module 6</option>
                             <option value="7">Module 7</option>
                         </select>
-                        <select id="assignmentUnit" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:1;min-width:150px;">
+                        <select id="assignmentUnit" style="padding:10px 15px;border:1px solid rgba(200,200,200,0.3);border-radius:6px;flex:1;min-width:150px;background:rgba(255,255,255,0.7);">
                             <option value="all">All Units</option>
                         </select>
                         <button onclick="assignTrainer()" style="padding:10px 25px;background:#28a745;color:white;border:none;border-radius:6px;font-weight:bold;cursor:pointer;">✅ Assign</button>
@@ -3486,9 +3698,9 @@
         loadProgressLog();
         loadArchivedStudents();
 
-        // Pre-fill login with sample credentials
-        document.getElementById('loginEmail').value = 'admin@example.com';
-        document.getElementById('loginPassword').value = 'admin123';
+        // Clear login fields for security - NO pre-filled credentials
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
     </script>
 </body>
 </html>
