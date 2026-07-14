@@ -1,0 +1,3494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computing and Informatics Trainee E-Portfolio Manager</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js">
+    </script>
+    <!-- SheetJS (XLSX) for Excel import/export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js">
+    </script>
+    <style>
+        /* ===== ALL STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        html,
+        body {
+            height: 100%;
+            background: #f4f7fc;
+            padding: 15px;
+            overflow-y: auto;
+        }
+        .container {
+            max-width: 1400px;
+            margin: auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== LOGIN PAGE ===== */
+        #loginPage {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #003366, #1a73e8);
+            margin: -15px;
+            padding: 20px;
+        }
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-box h1 {
+            color: #003366;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .login-box .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .login-box label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .login-box input,
+        .login-box select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+        .login-box input:focus,
+        .login-box select:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #003366;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .login-btn:hover {
+            background: #1a73e8;
+        }
+        .login-error {
+            color: #dc3545;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
+        .powered-by {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+            font-size: 12px;
+            color: #999;
+        }
+        .powered-by strong {
+            color: #1a73e8;
+        }
+        .app-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #999;
+        }
+        .app-footer strong {
+            color: #1a73e8;
+        }
+
+        /* ===== MAIN APP ===== */
+        #appPage {
+            display: none;
+            height: 100%;
+        }
+        #appPage.active {
+            display: block;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #003366;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .header h1 {
+            color: white;
+            font-size: 24px;
+            margin: 0;
+        }
+        .header .user-info {
+            color: white;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .header .user-info .role-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        .logout-btn {
+            padding: 8px 16px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .logout-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .nav-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            background: #1a73e8;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        .nav-btn:hover {
+            transform: scale(1.05);
+            background: #1557b0;
+        }
+        .nav-btn.portfolio {
+            background: #28a745;
+        }
+        .nav-btn.portfolio:hover {
+            background: #1e7e34;
+        }
+        .nav-btn.add-student {
+            background: #ff9800;
+        }
+        .nav-btn.add-student:hover {
+            background: #e68900;
+        }
+        .nav-btn.export-btn {
+            background: #6c757d;
+        }
+        .nav-btn.export-btn:hover {
+            background: #5a6268;
+        }
+        .nav-btn.users-btn {
+            background: #9c27b0;
+        }
+        .nav-btn.users-btn:hover {
+            background: #7b1fa2;
+        }
+        .nav-btn.trainer-portfolios-btn {
+            background: #00bcd4;
+        }
+        .nav-btn.trainer-portfolios-btn:hover {
+            background: #0097a7;
+        }
+        .nav-btn.add-unit {
+            background: #8bc34a;
+        }
+        .nav-btn.add-unit:hover {
+            background: #689f38;
+        }
+        .nav-btn.assign-trainer {
+            background: #ff5722;
+        }
+        .nav-btn.assign-trainer:hover {
+            background: #e64a19;
+        }
+
+        .trainer-view .course-selector select option:not(.trainer-assigned) {
+            display: none !important;
+        }
+        .trainer-view .nav-btn.add-student,
+        .trainer-view .nav-btn.export-btn,
+        .trainer-view .nav-btn.users-btn,
+        .trainer-view .nav-btn.trainer-portfolios-btn,
+        .trainer-view .nav-btn.add-unit,
+        .trainer-view .nav-btn.assign-trainer,
+        .trainer-view .btn-delete,
+        .trainer-view .registered-btn,
+        .trainer-view .not-registered-btn,
+        .trainer-view .btn-delete-unit {
+            display: none !important;
+        }
+        .trainer-view .add-student-form {
+            display: none !important;
+        }
+        .trainer-view .add-unit-form {
+            display: none !important;
+        }
+        .trainer-view .student div:last-child {
+            justify-content: center !important;
+        }
+
+        .hod-view .nav-btn.users-btn {
+            display: none !important;
+        }
+
+        .course-selector {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .course-selector select {
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 2px solid #1a73e8;
+            background: white;
+            font-weight: bold;
+            color: #003366;
+            cursor: pointer;
+            min-width: 280px;
+            width: 100%;
+            max-width: 500px;
+        }
+        .course-container {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .course-container.active {
+            display: block;
+        }
+        .legacy-section {
+            background: #fff;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, .12);
+        }
+        .legacy-header {
+            padding: 15px 20px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #6c757d;
+            color: #fff;
+            transition: background 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .legacy-header:hover {
+            background: #5a6268;
+        }
+        .legacy-header .count {
+            font-size: 14px;
+            font-weight: normal;
+            color: #ffff99;
+            margin-left: 10px;
+        }
+        .legacy-header .arrow {
+            font-size: 14px;
+            transition: transform 0.3s;
+        }
+        .legacy-header .arrow.collapsed {
+            transform: rotate(-90deg);
+        }
+        .legacy-content {
+            padding: 15px 20px;
+            max-height: 800px;
+            overflow-y: auto;
+            transition: max-height 0.3s ease;
+        }
+        .legacy-content.collapsed {
+            max-height: 0;
+            padding: 0 20px;
+            overflow: hidden;
+        }
+        details {
+            background: #fff;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, .12);
+        }
+        summary {
+            padding: 15px 20px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #1a73e8;
+            color: #fff;
+            transition: background 0.3s;
+        }
+        summary:hover {
+            background: #1557b0;
+        }
+        .content {
+            padding: 15px 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .student {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            border-left: 5px solid #1a73e8;
+            flex-wrap: wrap;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+        .student:hover {
+            background: #eef5ff;
+        }
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .student-info strong {
+            color: #003366;
+        }
+        .student div:last-child {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .units-section {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border-left: 4px solid #8bc34a;
+        }
+        .units-section h4 {
+            color: #003366;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .unit-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            margin: 4px 0;
+            background: white;
+            border-radius: 4px;
+            border-left: 3px solid #8bc34a;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .unit-item .unit-name {
+            font-size: 13px;
+            color: #333;
+        }
+        .unit-item .unit-code {
+            font-size: 12px;
+            color: #666;
+            background: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .btn-delete-unit {
+            background: #dc3545;
+            padding: 4px 10px;
+            font-size: 11px;
+        }
+        .btn-delete-unit:hover {
+            background: #c82333;
+        }
+
+        .add-unit-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        .add-unit-form.active {
+            display: block;
+        }
+        .add-unit-form h3 {
+            color: #003366;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            transition: all .3s;
+            font-size: 0.85rem;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        button:disabled {
+            background: #999 !important;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-portfolio {
+            background: #ff9800;
+        }
+        .btn-portfolio:hover {
+            background: #e68900;
+        }
+        .btn-delete {
+            background: #dc3545;
+        }
+        .btn-delete:hover {
+            background: #c82333;
+        }
+        .btn-edit {
+            background: #17a2b8;
+        }
+        .btn-edit:hover {
+            background: #138496;
+        }
+        .btn-registered {
+            background: #28a745;
+        }
+        .btn-registered:hover {
+            background: #1e7e34;
+        }
+        .btn-not-registered {
+            background: #dc3545;
+        }
+        .btn-not-registered:hover {
+            background: #c82333;
+        }
+        .btn-view-trainer {
+            background: #00bcd4;
+        }
+        .btn-view-trainer:hover {
+            background: #0097a7;
+        }
+        .btn-view-portfolio-link {
+            background: #9c27b0;
+        }
+        .btn-view-portfolio-link:hover {
+            background: #7b1fa2;
+        }
+        .btn-add-unit-action {
+            background: #8bc34a;
+        }
+        .btn-add-unit-action:hover {
+            background: #689f38;
+        }
+        .btn-assign {
+            background: #ff5722;
+        }
+        .btn-assign:hover {
+            background: #e64a19;
+        }
+        .btn-remove-assign {
+            background: #dc3545;
+        }
+        .btn-remove-assign:hover {
+            background: #c82333;
+        }
+        .count {
+            font-size: 14px;
+            font-weight: normal;
+            color: #ffff99;
+            margin-left: 10px;
+        }
+
+        .add-student-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        .add-student-form.active {
+            display: block;
+        }
+        .add-student-form h3 {
+            color: #003366;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .form-group input,
+        .form-group select {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 150px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+        .form-group button {
+            padding: 10px 25px;
+            background: #28a745;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .form-group button:hover {
+            background: #1e7e34;
+            transform: scale(1.05);
+        }
+        .form-group .portfolio-link-input {
+            flex: 2;
+            min-width: 250px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            overflow: auto;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #1a73e8;
+            padding-bottom: 15px;
+        }
+        .modal-header h2 {
+            color: #003366;
+        }
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .close:hover {
+            color: #000;
+        }
+        .portfolio-detail {
+            padding: 10px 0;
+        }
+        .portfolio-detail p {
+            margin: 10px 0;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .portfolio-detail strong {
+            color: #003366;
+            display: inline-block;
+            min-width: 120px;
+        }
+        .portfolio-link-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #9c27b0;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .portfolio-link-btn:hover {
+            background: #7b1fa2;
+            transform: scale(1.05);
+        }
+        .data-status {
+            text-align: center;
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 10px;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .users-table th,
+        .users-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .users-table th {
+            background: #003366;
+            color: white;
+            font-weight: bold;
+        }
+        .users-table tr:hover {
+            background: #f5f5f5;
+        }
+        .users-table .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .users-table .btn-sm {
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-badge.active {
+            background: #28a745;
+            color: white;
+        }
+        .status-badge.inactive {
+            background: #dc3545;
+            color: white;
+        }
+
+        .trainer-portfolios-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .trainer-portfolios-table th,
+        .trainer-portfolios-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .trainer-portfolios-table th {
+            background: #003366;
+            color: white;
+            font-weight: bold;
+        }
+        .trainer-portfolios-table tr:hover {
+            background: #f5f5f5;
+        }
+        .trainer-portfolios-table .student-count {
+            background: #1a73e8;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .assignment-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .assignment-table th,
+        .assignment-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .assignment-table th {
+            background: #003366;
+            color: white;
+            font-weight: bold;
+        }
+        .assignment-table tr:hover {
+            background: #f5f5f5;
+        }
+        .assignment-table .module-badge {
+            background: #1a73e8;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .auto-badge {
+            background: #ffc107;
+            color: #333;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        .stalled-badge {
+            background: #dc3545;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 6px;
+        }
+        .trainer-digest {
+            background: #e8f0fe;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            border-left: 4px solid #1a73e8;
+        }
+        .trainer-digest strong {
+            color: #003366;
+        }
+        .in-app-banner {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+        }
+        .in-app-banner.show {
+            display: block;
+        }
+
+        .assignment-detail {
+            font-size: 13px;
+            color: #333;
+            background: #f0f4f8;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin: 2px 0;
+        }
+        .assignment-detail strong {
+            color: #003366;
+        }
+
+        /* import/export styling */
+        .import-export-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        /* ===== TRAINER DASHBOARD STYLES ===== */
+        .trainer-dashboard {
+            background: #fff;
+            border-radius: 10px;
+            padding: 0;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .trainer-dashboard .dashboard-header {
+            background: linear-gradient(135deg, #003366, #1a4a7a);
+            color: white;
+            padding: 20px 25px;
+        }
+        .trainer-dashboard .dashboard-header h2 {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+        .trainer-dashboard .dashboard-header p {
+            opacity: 0.8;
+            font-size: 14px;
+        }
+
+        .trainer-dashboard .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            padding: 20px 25px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .trainer-dashboard .stat-card {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .trainer-dashboard .stat-card .number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #003366;
+        }
+        .trainer-dashboard .stat-card .label {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .trainer-dashboard .courses-section {
+            padding: 20px 25px;
+        }
+        .trainer-dashboard .courses-section h3 {
+            color: #003366;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .trainer-course-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 1px solid #e9ecef;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+        .trainer-course-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .trainer-course-card .course-head {
+            background: #003366;
+            color: white;
+            padding: 12px 18px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .trainer-course-card .course-head:hover {
+            background: #1a4a7a;
+        }
+        .trainer-course-card .course-head .course-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: normal;
+        }
+        .trainer-course-card .course-head .arrow-icon {
+            transition: transform 0.3s;
+            font-size: 14px;
+        }
+        .trainer-course-card .course-head .arrow-icon.open {
+            transform: rotate(90deg);
+        }
+
+        .trainer-course-card .course-body {
+            padding: 0 18px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s ease;
+        }
+        .trainer-course-card .course-body.open {
+            max-height: 5000px;
+            padding: 15px 18px;
+        }
+
+        .trainer-module-block {
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border: 1px solid #e9ecef;
+            overflow: hidden;
+        }
+        .trainer-module-block .module-head {
+            background: #e8f0fe;
+            padding: 8px 14px;
+            font-weight: 600;
+            color: #003366;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .trainer-module-block .module-head:hover {
+            background: #d4e2f5;
+        }
+        .trainer-module-block .module-head .module-badge {
+            background: #1a73e8;
+            color: white;
+            padding: 1px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: normal;
+        }
+        .trainer-module-block .module-head .arrow-icon {
+            transition: transform 0.3s;
+            font-size: 12px;
+        }
+        .trainer-module-block .module-head .arrow-icon.open {
+            transform: rotate(90deg);
+        }
+
+        .trainer-module-block .module-body {
+            padding: 0 14px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+        .trainer-module-block .module-body.open {
+            max-height: 3000px;
+            padding: 10px 14px;
+        }
+
+        .trainer-unit-row {
+            background: #f8f9fa;
+            padding: 6px 12px;
+            margin: 4px 0;
+            border-radius: 4px;
+            border-left: 3px solid #8bc34a;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .trainer-unit-row .unit-code {
+            font-weight: 600;
+            color: #003366;
+        }
+        .trainer-unit-row .unit-name {
+            color: #333;
+            flex: 1;
+        }
+        .trainer-unit-row .unit-student-count {
+            background: #1a73e8;
+            color: white;
+            padding: 1px 12px;
+            border-radius: 10px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .trainer-unit-row .unit-student-count:hover {
+            background: #1557b0;
+        }
+
+        .trainer-student-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 10px;
+            margin: 3px 0;
+            background: #fff;
+            border-radius: 3px;
+            border-left: 2px solid #1a73e8;
+            flex-wrap: wrap;
+            gap: 4px;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .trainer-student-item:hover {
+            background: #f0f4f8;
+        }
+        .trainer-student-item .student-name {
+            font-weight: 500;
+            color: #003366;
+        }
+        .trainer-student-item .student-id {
+            color: #666;
+            font-size: 12px;
+        }
+        .trainer-student-item .student-actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .trainer-student-item .student-actions .btn-sm {
+            padding: 2px 10px;
+            font-size: 11px;
+        }
+
+        /* ===== STUDENT POPUP ===== */
+        .student-popup {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            overflow: auto;
+        }
+        .student-popup .popup-content {
+            background: #fff;
+            margin: 5% auto;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s ease;
+        }
+        .student-popup .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #1a73e8;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+        .student-popup .popup-header h3 {
+            color: #003366;
+            font-size: 18px;
+        }
+        .student-popup .popup-close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .student-popup .popup-close:hover {
+            color: #000;
+        }
+        .student-popup .student-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin: 4px 0;
+            background: #f9f9f9;
+            border-radius: 4px;
+            border-left: 3px solid #1a73e8;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .student-popup .student-row:hover {
+            background: #eef5ff;
+        }
+        .student-popup .student-row .student-info {
+            font-size: 14px;
+        }
+        .student-popup .student-row .student-info strong {
+            color: #003366;
+        }
+        .student-popup .student-row .student-info small {
+            color: #666;
+            font-size: 12px;
+            margin-left: 6px;
+        }
+        .student-popup .student-row .student-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        /* ===== FIXED: MODAL OVERLAY - NO CLOSE ON BACKGROUND CLICK ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            overflow: auto;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s ease;
+            position: relative;
+        }
+        .modal-content .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .modal-content .close:hover {
+            color: #000;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #1a73e8;
+            padding-bottom: 15px;
+            padding-right: 40px;
+        }
+        .modal-header h2 {
+            color: #003366;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .nav-buttons {
+                justify-content: center;
+            }
+            .student {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .student div:last-child {
+                justify-content: center !important;
+            }
+            button {
+                flex: 1;
+                text-align: center;
+            }
+            .course-selector select {
+                min-width: 200px;
+                width: 100%;
+            }
+            .modal-content {
+                margin: 10% auto;
+                padding: 20px;
+                width: 95%;
+            }
+            .form-group {
+                flex-direction: column;
+            }
+            .form-group input,
+            .form-group select {
+                width: 100%;
+            }
+            .login-box {
+                padding: 25px;
+            }
+            .users-table {
+                font-size: 12px;
+            }
+            .users-table th,
+            .users-table td {
+                padding: 8px 10px;
+            }
+            .trainer-portfolios-table {
+                font-size: 12px;
+            }
+            .trainer-portfolios-table th,
+            .trainer-portfolios-table td {
+                padding: 8px 10px;
+            }
+            .assignment-table {
+                font-size: 12px;
+            }
+            .assignment-table th,
+            .assignment-table td {
+                padding: 8px 10px;
+            }
+            .trainer-dashboard .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .student-popup .popup-content {
+                margin: 10% auto;
+                padding: 20px;
+                width: 95%;
+            }
+            .modal-content .close {
+                right: 15px;
+                top: 10px;
+                font-size: 24px;
+            }
+            .modal-header {
+                padding-right: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== LOGIN PAGE ===== -->
+    <div id="loginPage">
+        <div class="login-box">
+            <h1>📚 C&I Trainee E-Portfolio Manager</h1>
+            <p class="subtitle">Sign in to access your dashboard</p>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                <label for="loginRole">Select Role</label>
+                <select id="loginRole">
+                    <option value="admin">Admin</option>
+                    <option value="hod">HOD</option>
+                    <option value="trainer">Trainer</option>
+                </select>
+                <button type="submit" class="login-btn">Sign In</button>
+                <div id="loginError" class="login-error">Invalid credentials. Please try again.</div>
+            </form>
+            <div class="powered-by">
+                Powered by <strong>Kiplagat Kogo</strong> - Computing and Informatics Department
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MAIN APP ===== -->
+    <div id="appPage">
+        <div class="container">
+            <div class="header">
+                <h1>📚 Computing and Informatics Trainee E-Portfolio Manager<span class="sync-badge" id="syncStatus">● Live</span></h1>
+                <div class="user-info">
+                    <span id="userNameDisplay">User</span>
+                    <span class="role-badge" id="userRoleDisplay">Admin</span>
+                    <button class="logout-btn" onclick="handleLogout()">🚪 Logout</button>
+                </div>
+                <div class="nav-buttons" id="navButtons">
+                    <button class="nav-btn" onclick="window.location.reload()">🏠 Home</button>
+                    <button class="nav-btn add-student" onclick="toggleAddStudentForm()">➕ Add Student</button>
+                    <button class="nav-btn add-unit" onclick="toggleAddUnitForm()">📚 Add Unit</button>
+                    <button class="nav-btn assign-trainer" onclick="showTrainerAssignment()">📋 Assign Trainer</button>
+                    <button class="nav-btn export-btn" onclick="exportToExcel()">📤 Export Excel</button>
+                    <button class="nav-btn export-btn file-input-wrapper" style="background:#6c757d;">
+                        📥 Import Excel
+                        <input type="file" id="importFile" accept=".xlsx,.xls" onchange="importFromExcel(event)">
+                    </button>
+                    <button class="nav-btn portfolio" onclick="showAllPortfolios()">📁 All Portfolios</button>
+                    <button class="nav-btn trainer-portfolios-btn" onclick="showTrainerPortfolios()">📋 Trainer Portfolios</button>
+                    <button class="nav-btn users-btn" onclick="showUserManagement()">👥 Manage Users</button>
+                </div>
+            </div>
+
+            <!-- In-app banner for trainer notifications -->
+            <div id="inAppBanner" class="in-app-banner"></div>
+
+            <!-- ===== TRAINER DASHBOARD ===== -->
+            <div id="trainerDashboard" class="trainer-dashboard" style="display:none;"></div>
+
+            <div class="add-student-form" id="addStudentForm">
+                <h3>➕ Add New Student to <span id="currentCourseName">ICT Technician Level 6</span></h3>
+                <div class="form-group">
+                    <input type="text" id="studentId" placeholder="Admission Number (e.g., 2025S12345)" required>
+                    <input type="text" id="studentName" placeholder="Student Name (e.g., John Doe)" required>
+                    <select id="studentCycle">
+                        <option value="module">Module Program (Module 1)</option>
+                        <option value="cycle1">Cycle One (Legacy)</option>
+                        <option value="cycle2">Cycle Two (Legacy)</option>
+                    </select>
+                    <input type="text" id="studentPortfolioLink" class="portfolio-link-input" placeholder="Portfolio Link (e.g., https://example.com/portfolio/student-id)">
+                    <button onclick="addStudent()">Add Student</button>
+                    <button onclick="toggleAddStudentForm()" style="background:#6c757d;">Cancel</button>
+                </div>
+                <div id="addMessage" style="margin-top:10px;font-weight:bold;"></div>
+            </div>
+
+            <div class="add-unit-form" id="addUnitForm">
+                <h3>📚 Add Unit to Module <span id="currentModuleName">1</span> in <span id="currentCourseNameUnit">ICT Technician Level 6</span></h3>
+                <div class="form-group">
+                    <input type="text" id="unitCode" placeholder="Unit Code (e.g., ICT-101)" required>
+                    <input type="text" id="unitName" placeholder="Unit Name (e.g., Introduction to ICT)" required>
+                    <select id="unitModule">
+                        <option value="1">Module 1</option>
+                        <option value="2">Module 2</option>
+                        <option value="3">Module 3</option>
+                        <option value="4">Module 4</option>
+                        <option value="5">Module 5</option>
+                        <option value="6">Module 6</option>
+                        <option value="7">Module 7</option>
+                    </select>
+                    <button onclick="addUnit()">Add Unit</button>
+                    <button onclick="toggleAddUnitForm()" style="background:#6c757d;">Cancel</button>
+                </div>
+                <div id="addUnitMessage" style="margin-top:10px;font-weight:bold;"></div>
+            </div>
+
+            <div class="course-selector">
+                <select id="courseDropdown" onchange="switchCourse()">
+                    <option value="ict6">ICT Technician Level 6</option>
+                    <option value="ict5">ICT Technician Level 5</option>
+                    <option value="cs6">Computer Science Level 6</option>
+                    <option value="cyber6">Cyber Security Level 6</option>
+                    <option value="cyber5">Cyber Security Level 5</option>
+                    <option value="ict4">ICT Operator Level 4</option>
+                    <option value="lib6">Library and Information Science Level 6</option>
+                    <option value="lib5">Library and Information Science Level 5</option>
+                    <option value="journal6">Digital Journalism and Reporting Level 6</option>
+                </select>
+                <span id="courseBadge" style="font-size:14px;color:#666;margin-left:10px;"></span>
+            </div>
+
+            <div id="ict6" class="course-container active"></div>
+            <div id="ict5" class="course-container"></div>
+            <div id="cs6" class="course-container"></div>
+            <div id="cyber6" class="course-container"></div>
+            <div id="cyber5" class="course-container"></div>
+            <div id="ict4" class="course-container"></div>
+            <div id="lib6" class="course-container"></div>
+            <div id="lib5" class="course-container"></div>
+            <div id="journal6" class="course-container"></div>
+
+            <div class="data-status" id="dataStatus"></div>
+            <div class="app-footer">
+                Powered by <strong>Kiplagat Kogo</strong> - Computing and Informatics Department
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <div id="portfolioModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <div class="modal-header">
+                    <h2 id="modalTitle">Student Portfolio</h2>
+                </div>
+                <div class="portfolio-detail" id="modalBody">
+                    <p><strong>ID:</strong> <span id="pId">-</span></p>
+                    <p><strong>Name:</strong> <span id="pName">-</span></p>
+                    <p><strong>Course:</strong> <span id="pCourse">-</span></p>
+                    <p><strong>Level:</strong> <span id="pLevel">-</span></p>
+                    <p><strong>Current Module:</strong> <span id="pModule">-</span></p>
+                    <p><strong>Status:</strong> <span id="pStatus">-</span></p>
+                    <p><strong>Progress:</strong> <span id="pProgress">-</span></p>
+                    <p><strong>Portfolio Link:</strong> <span id="pPortfolioLink">-</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="userModal" class="modal">
+            <div class="modal-content" style="max-width: 800px;">
+                <span class="close" onclick="closeUserModal()">&times;</span>
+                <div class="modal-header">
+                    <h2>👥 User Management</h2>
+                </div>
+                <div id="userModalBody">
+                    <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                        <input type="text" id="newUserEmail" placeholder="Email" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:1;min-width:150px;">
+                        <input type="text" id="newUserName" placeholder="Full Name" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:1;min-width:150px;">
+                        <input type="password" id="newUserPassword" placeholder="Password" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:1;min-width:150px;">
+                        <input type="text" id="newUserPortfolioLink" placeholder="Trainer Portfolio Link (optional)" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:2;min-width:200px;">
+                        <select id="newUserRole" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:1;min-width:120px;">
+                            <option value="hod">HOD</option>
+                            <option value="trainer">Trainer</option>
+                        </select>
+                        <button onclick="addUser()" style="padding:10px 25px;background:#28a745;color:white;border:none;border-radius:6px;font-weight:bold;cursor:pointer;">➕ Add User</button>
+                    </div>
+                    <div id="userMessage" style="margin-bottom:15px;font-weight:bold;"></div>
+                    <div style="overflow-x:auto;">
+                        <table class="users-table" id="usersTable">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Portfolio Link</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="trainerPortfoliosModal" class="modal">
+            <div class="modal-content" style="max-width: 900px;">
+                <span class="close" onclick="closeTrainerPortfoliosModal()">&times;</span>
+                <div class="modal-header">
+                    <h2>📋 Trainer Portfolios Overview</h2>
+                </div>
+                <div id="trainerPortfoliosBody">
+                    <div style="margin-bottom: 15px; color: #666; font-size: 14px;">View all trainers and the students assigned to them.</div>
+                    <div style="overflow-x:auto;">
+                        <table class="trainer-portfolios-table" id="trainerPortfoliosTable">
+                            <thead>
+                                <tr>
+                                    <th>Trainer Name</th>
+                                    <th>Email</th>
+                                    <th>Assigned Students</th>
+                                    <th>Avg Progress</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trainerPortfoliosTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="assignmentModal" class="modal">
+            <div class="modal-content" style="max-width: 900px;">
+                <span class="close" onclick="closeAssignmentModal()">&times;</span>
+                <div class="modal-header">
+                    <h2>📋 Assign Trainer to Courses, Modules & Units</h2>
+                </div>
+                <div id="assignmentBody">
+                    <div style="margin-bottom: 15px; color: #666; font-size: 14px;">Select a trainer and assign them to specific courses, modules, and units.</div>
+                    <div style="margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                        <select id="assignmentTrainer" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:1;min-width:200px;">
+                            <option value="">Select Trainer</option>
+                        </select>
+                        <select id="assignmentCourse" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:1;min-width:200px;">
+                            <option value="">Select Course</option>
+                            <option value="ict6">ICT Technician Level 6</option>
+                            <option value="ict5">ICT Technician Level 5</option>
+                            <option value="cs6">Computer Science Level 6</option>
+                            <option value="cyber6">Cyber Security Level 6</option>
+                            <option value="cyber5">Cyber Security Level 5</option>
+                            <option value="ict4">ICT Operator Level 4</option>
+                            <option value="lib6">Library and Information Science Level 6</option>
+                            <option value="lib5">Library and Information Science Level 5</option>
+                            <option value="journal6">Digital Journalism and Reporting Level 6</option>
+                        </select>
+                        <select id="assignmentModule" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:1;min-width:150px;">
+                            <option value="all">All Modules</option>
+                            <option value="1">Module 1</option>
+                            <option value="2">Module 2</option>
+                            <option value="3">Module 3</option>
+                            <option value="4">Module 4</option>
+                            <option value="5">Module 5</option>
+                            <option value="6">Module 6</option>
+                            <option value="7">Module 7</option>
+                        </select>
+                        <select id="assignmentUnit" style="padding:10px 15px;border:2px solid #ddd;border-radius:6px;flex:1;min-width:150px;">
+                            <option value="all">All Units</option>
+                        </select>
+                        <button onclick="assignTrainer()" style="padding:10px 25px;background:#28a745;color:white;border:none;border-radius:6px;font-weight:bold;cursor:pointer;">✅ Assign</button>
+                    </div>
+                    <div id="assignmentMessage" style="margin-bottom:15px;font-weight:bold;"></div>
+                    <div style="overflow-x:auto;">
+                        <table class="assignment-table" id="assignmentTable">
+                            <thead>
+                                <tr>
+                                    <th>Trainer</th>
+                                    <th>Course</th>
+                                    <th>Modules & Units</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assignmentTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== STUDENT POPUP ===== -->
+    <div id="studentPopup" class="student-popup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 id="popupTitle">Students</h3>
+                <span class="popup-close" onclick="closeStudentPopup()">&times;</span>
+            </div>
+            <div id="popupBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // ========== FIREBASE INIT ==========
+        const firebaseConfig = {
+            apiKey: "AIzaSyBU7DQvLqGRMV-W9NoVZARmJdrgY3DWAu8",
+            authDomain: "student-portfolio-manager.firebaseapp.com",
+            projectId: "student-portfolio-manager",
+            storageBucket: "student-portfolio-manager.firebasestorage.app",
+            messagingSenderId: "298863036013",
+            appId: "1:298863036013:web:49d3cc9046c50b16612164",
+            measurementId: "G-FZHK9V1K11"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ========== COURSE STRUCTURE ==========
+        const courseStructure = {
+            ict6: { title: "ICT Technician Level 6", level: "Level 6", students: [], units: { 1: [], 2: [], 3: [], 4: [],
+                    5: [], 6: [], 7: [] } },
+            ict5: { title: "ICT Technician Level 5", level: "Level 5", students: [], units: { 1: [], 2: [], 3: [], 4: [],
+                    5: [], 6: [], 7: [] } },
+            cs6: { title: "Computer Science Level 6", level: "Level 6", students: [], units: { 1: [], 2: [], 3: [], 4: [],
+                    5: [], 6: [], 7: [] } },
+            cyber6: { title: "Cyber Security Level 6", level: "Level 6", students: [], units: { 1: [], 2: [], 3: [],
+                    4: [], 5: [], 6: [], 7: [] } },
+            cyber5: { title: "Cyber Security Level 5", level: "Level 5", students: [], units: { 1: [], 2: [], 3: [],
+                    4: [], 5: [], 6: [], 7: [] } },
+            ict4: { title: "ICT Operator Level 4", level: "Level 4", students: [], units: { 1: [], 2: [], 3: [], 4: [],
+                    5: [], 6: [], 7: [] } },
+            lib6: { title: "Library and Information Science Level 6", level: "Level 6", students: [], units: { 1: [],
+                    2: [], 3: [], 4: [], 5: [], 6: [], 7: [] } },
+            lib5: { title: "Library and Information Science Level 5", level: "Level 5", students: [], units: { 1: [],
+                    2: [], 3: [], 4: [], 5: [], 6: [], 7: [] } },
+            journal6: { title: "Digital Journalism and Reporting Level 6", level: "Level 6", students: [], units: { 1: [],
+                    2: [], 3: [], 4: [], 5: [], 6: [], 7: [] } }
+        };
+
+        // ========== GLOBAL STATE ==========
+        let courseData = {};
+        let currentCourseKey = 'ict6';
+        let currentUser = null;
+        let userRole = 'trainer';
+        let allUsers = {};
+        let trainerAssignments = {};
+        let trainerStudentAssignments = {};
+        let progressLog = [];
+        let archivedStudents = [];
+
+        // ========== DOM REFS ==========
+        const syncBadge = document.getElementById('syncStatus');
+        const inAppBanner = document.getElementById('inAppBanner');
+
+        // ========== LOAD FUNCTIONS ==========
+        async function loadUsersFromFirebase() {
+            try {
+                const doc = await db.collection('config').doc('users').get();
+                if (doc.exists) {
+                    allUsers = doc.data();
+                    return true;
+                } else {
+                    allUsers = {
+                        'admin@example.com': { password: 'admin123', role: 'admin', name: 'Admin User',
+                        status: 'active', portfolioLink: '' },
+                        'hod@example.com': { password: 'hod123', role: 'hod', name: 'HOD User', status: 'active',
+                            portfolioLink: '' },
+                        'trainer@example.com': { password: 'trainer123', role: 'trainer', name: 'Trainer User',
+                            status: 'active', portfolioLink: '' }
+                    };
+                    await db.collection('config').doc('users').set(allUsers);
+                    return true;
+                }
+            } catch (e) { console.warn('Error loading users:', e); return false; }
+        }
+        async function saveUsersToFirebase() {
+            try { await db.collection('config').doc('users').set(allUsers); return true; } catch (e) { console.error(
+                    'Error saving users:', e); return false; }
+        }
+
+        async function loadTrainerAssignments() {
+            try {
+                const doc = await db.collection('config').doc('trainerAssignments').get();
+                if (doc.exists) {
+                    trainerAssignments = doc.data();
+                    console.log('✅ Trainer assignments loaded:', trainerAssignments);
+                    return true;
+                } else {
+                    trainerAssignments = {};
+                    await db.collection('config').doc('trainerAssignments').set(trainerAssignments);
+                    console.log('⚠️ No trainer assignments found, created empty');
+                    return true;
+                }
+            } catch (e) { console.warn('Error loading trainer assignments:', e); return false; }
+        }
+        async function saveTrainerAssignments() {
+            try { await db.collection('config').doc('trainerAssignments').set(trainerAssignments); return true; } catch (
+                e) { console.error('Error saving trainer assignments:', e); return false; }
+        }
+
+        async function loadTrainerStudentAssignments() {
+            try {
+                const doc = await db.collection('config').doc('trainerStudentAssignments').get();
+                if (doc.exists) {
+                    trainerStudentAssignments = doc.data();
+                    console.log('✅ Trainer student assignments loaded:', trainerStudentAssignments);
+                    return true;
+                } else {
+                    trainerStudentAssignments = {};
+                    await db.collection('config').doc('trainerStudentAssignments').set(trainerStudentAssignments);
+                    return true;
+                }
+            } catch (e) { console.warn('Error loading trainer student assignments:', e); return false; }
+        }
+        async function saveTrainerStudentAssignments() {
+            try { await db.collection('config').doc('trainerStudentAssignments').set(trainerStudentAssignments); return true; } catch (
+                e) { console.error('Error saving trainer student assignments:', e); return false; }
+        }
+
+        async function loadProgressLog() {
+            try {
+                const doc = await db.collection('config').doc('progressLog').get();
+                if (doc.exists) { progressLog = doc.data().logs || []; } else { progressLog = []; }
+            } catch (e) { console.warn('Error loading progress log:', e); }
+        }
+        async function saveProgressLog() {
+            try { await db.collection('config').doc('progressLog').set({ logs: progressLog }); } catch (e) { console.error(
+                    'Error saving progress log:', e); }
+        }
+
+        async function loadArchivedStudents() {
+            try {
+                const doc = await db.collection('config').doc('archivedStudents').get();
+                if (doc.exists) { archivedStudents = doc.data().students || []; } else { archivedStudents = []; }
+            } catch (e) { console.warn('Error loading archived students:', e); }
+        }
+        async function saveArchivedStudents() {
+            try { await db.collection('config').doc('archivedStudents').set({ students: archivedStudents }); } catch (e) { console
+                    .error('Error saving archived students:', e); }
+        }
+
+        // ========== AUTH FUNCTIONS ==========
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const role = document.getElementById('loginRole').value;
+            const errorDiv = document.getElementById('loginError');
+
+            await loadUsersFromFirebase();
+            await loadTrainerAssignments();
+            await loadTrainerStudentAssignments();
+            await loadProgressLog();
+            await loadArchivedStudents();
+
+            const user = allUsers[email];
+            if (user && user.password === password && user.role === role && user.status === 'active') {
+                currentUser = { email, ...user };
+                userRole = role;
+                errorDiv.style.display = 'none';
+                showApp();
+            } else {
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            userRole = 'trainer';
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('appPage').classList.remove('active');
+            document.getElementById('loginForm').reset();
+        }
+
+        function showApp() {
+            document.getElementById('loginPage').style.display = 'none';
+            const appPage = document.getElementById('appPage');
+            appPage.classList.add('active');
+
+            document.getElementById('userNameDisplay').textContent = currentUser.name;
+            document.getElementById('userRoleDisplay').textContent = currentUser.role.toUpperCase();
+
+            const container = document.querySelector('.container');
+            container.classList.remove('trainer-view', 'hod-view');
+
+            if (userRole === 'trainer') {
+                container.classList.add('trainer-view');
+                filterTrainerCourses();
+                // Show trainer dashboard
+                document.getElementById('trainerDashboard').style.display = 'block';
+                // Hide course selector for trainers
+                document.querySelector('.course-selector').style.display = 'none';
+                // Hide admin-only buttons
+                document.querySelectorAll('.nav-btn.add-student, .nav-btn.add-unit, .nav-btn.assign-trainer, .nav-btn.export-btn, .nav-btn.users-btn')
+                    .forEach(el => el.style.display = 'none');
+                // Show portfolio button for trainers
+                document.querySelector('.nav-btn.portfolio').style.display = '';
+                // Hide course containers
+                document.querySelectorAll('.course-container').forEach(el => el.style.display = 'none');
+            } else if (userRole === 'hod') {
+                container.classList.add('hod-view');
+                document.getElementById('trainerDashboard').style.display = 'none';
+                document.querySelector('.course-selector').style.display = '';
+                document.querySelectorAll('.course-container').forEach(el => el.style.display = '');
+            } else {
+                document.getElementById('trainerDashboard').style.display = 'none';
+                document.querySelector('.course-selector').style.display = '';
+                document.querySelectorAll('.course-container').forEach(el => el.style.display = '');
+            }
+
+            initData();
+
+            if (userRole === 'trainer') {
+                // Refresh dashboard every 15 seconds
+                setInterval(() => {
+                    loadTrainerAssignments().then(() => {
+                        loadTrainerStudentAssignments().then(() => {
+                            filterTrainerCourses();
+                            renderTrainerDashboard();
+                            checkForNewStudents();
+                        });
+                    });
+                }, 15000);
+            }
+            if (userRole === 'hod' || userRole === 'admin') {
+                setInterval(() => {
+                    const trainerModal = document.getElementById('trainerPortfoliosModal');
+                    if (trainerModal.style.display === 'block') {
+                        renderTrainerPortfoliosTable();
+                    }
+                }, 45000);
+            }
+        }
+
+        function filterTrainerCourses() {
+            const dropdown = document.getElementById('courseDropdown');
+            const trainerEmail = currentUser.email;
+            const assignments = trainerAssignments[trainerEmail] || {};
+
+            for (let option of dropdown.options) {
+                if (option.value === 'ict6' || option.value === 'ict5' || option.value === 'cs6' ||
+                    option.value === 'cyber6' || option.value === 'cyber5' || option.value === 'ict4' ||
+                    option.value === 'lib6' || option.value === 'lib5' || option.value === 'journal6') {
+                    if (assignments[option.value]) {
+                        option.style.display = '';
+                        option.classList.add('trainer-assigned');
+                    } else {
+                        option.style.display = 'none';
+                        option.classList.remove('trainer-assigned');
+                    }
+                }
+            }
+            for (let option of dropdown.options) {
+                if (option.style.display !== 'none' && option.value !== '') { dropdown.value = option.value; break; }
+            }
+        }
+
+        // ========== FIRESTORE HELPERS ==========
+        async function loadFromFirestore() {
+            try {
+                const doc = await db.collection('config').doc('courseData').get();
+                if (doc.exists) {
+                    const remote = doc.data();
+                    courseData = JSON.parse(JSON.stringify(courseStructure));
+                    for (let key in remote) {
+                        if (courseData[key]) {
+                            courseData[key].students = remote[key].students || [];
+                            if (remote[key].units) { courseData[key].units = remote[key].units; }
+                        }
+                    }
+                    document.getElementById('dataStatus').textContent = '✅ Loaded from Firebase';
+                    syncBadge.textContent = '● Live';
+                    return true;
+                } else {
+                    courseData = JSON.parse(JSON.stringify(courseStructure));
+                    await saveToFirebase();
+                    document.getElementById('dataStatus').textContent = '☁️ Firebase initialized';
+                    return true;
+                }
+            } catch (e) { console.warn('Firestore load error', e); return false; }
+        }
+
+        async function saveToFirebase() {
+            try {
+                const payload = {};
+                for (let key in courseData) {
+                    payload[key] = { students: courseData[key].students, units: courseData[key].units };
+                }
+                await db.collection('config').doc('courseData').set(payload);
+                document.getElementById('dataStatus').textContent = '💾 Synced to Firebase ✓';
+                syncBadge.textContent = '● Live';
+            } catch (e) { console.error('Firestore save error:', e);
+                document.getElementById('dataStatus').textContent = '⚠️ Sync error – check console';
+                syncBadge.textContent = '⚠️ Offline'; }
+        }
+
+        // ========== LOCAL STORAGE ==========
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('courseData');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    courseData = JSON.parse(JSON.stringify(courseStructure));
+                    for (let key in parsed) {
+                        if (courseData[key]) {
+                            courseData[key].students = parsed[key].students || [];
+                            if (parsed[key].units) { courseData[key].units = parsed[key].units; }
+                        }
+                    }
+                    document.getElementById('dataStatus').textContent = '💾 Loaded from browser storage';
+                    return true;
+                } catch (e) { courseData = JSON.parse(JSON.stringify(courseStructure)); return false; }
+            } else { courseData = JSON.parse(JSON.stringify(courseStructure)); return false; }
+        }
+        function saveToLocalStorage() { localStorage.setItem('courseData', JSON.stringify(courseData)); }
+
+        async function saveData() { saveToLocalStorage();
+            await saveToFirebase(); }
+
+        // ========== INIT ==========
+        function initData() {
+            loadFromLocalStorage();
+            // Don't render course for trainer - we show dashboard instead
+            if (userRole !== 'trainer') {
+                renderCourse(currentCourseKey);
+            }
+            document.getElementById('dataStatus').textContent = '📊 Data loaded - syncing with Firebase...';
+            loadFromFirestore().then(() => {
+                if (userRole !== 'trainer') {
+                    renderCourse(currentCourseKey);
+                }
+                document.getElementById('dataStatus').textContent = '';
+                if (userRole === 'trainer') {
+                    generateTrainerDigest();
+                    checkForNewStudents();
+                    // CRITICAL FIX: Call renderTrainerDashboard after data loads
+                    setTimeout(() => {
+                        renderTrainerDashboard();
+                    }, 500);
+                }
+                if (userRole === 'hod' || userRole === 'admin') {
+                    sortCourseDropdownByAttention();
+                    updateCourseBadge();
+                }
+                populateUnitDropdown();
+            }).catch(() => {
+                document.getElementById('dataStatus').textContent = '⚠️ Using local data (Firebase unavailable)';
+                if (userRole === 'trainer') {
+                    setTimeout(() => {
+                        renderTrainerDashboard();
+                    }, 500);
+                }
+            });
+        }
+
+        function populateUnitDropdown() {
+            const courseKey = document.getElementById('assignmentCourse').value;
+            const module = document.getElementById('assignmentModule').value;
+            const unitSelect = document.getElementById('assignmentUnit');
+            unitSelect.innerHTML = '<option value="all">All Units</option>';
+            if (courseKey && module && module !== 'all' && courseData[courseKey] && courseData[courseKey].units[module]) {
+                courseData[courseKey].units[module].forEach(u => {
+                    const opt = document.createElement('option');
+                    opt.value = u.code;
+                    opt.textContent = `${u.code} - ${u.name}`;
+                    unitSelect.appendChild(opt);
+                });
+            }
+        }
+
+        document.getElementById('assignmentCourse').addEventListener('change', populateUnitDropdown);
+        document.getElementById('assignmentModule').addEventListener('change', populateUnitDropdown);
+
+        // ========== EXCEL EXPORT ==========
+        function exportToExcel() {
+            if (userRole === 'trainer') { alert('Trainers cannot export data.'); return; }
+
+            try {
+                const wb = XLSX.utils.book_new();
+
+                for (let courseKey in courseData) {
+                    const course = courseData[courseKey];
+                    if (!course || !course.students || course.students.length === 0) continue;
+
+                    const rows = [];
+                    rows.push(['Student ID', 'Student Name', 'Email', 'Phone', 'Module/Cycle', 'Portfolio Link',
+                        'Last Updated'
+                    ]);
+
+                    course.students.forEach(s => {
+                        const program = s.module !== undefined ? `Module ${s.module}/7` :
+                            s.cycle === 'cycle1' ? 'Cycle One' : 'Cycle Two';
+                        rows.push([
+                            s.id || '',
+                            s.name || '',
+                            s.email || '',
+                            s.phone || '',
+                            program,
+                            s.portfolioLink || '',
+                            s.lastUpdated ? new Date(s.lastUpdated).toLocaleDateString() : ''
+                        ]);
+                    });
+
+                    const ws = XLSX.utils.aoa_to_sheet(rows);
+                    ws['!cols'] = [
+                        { wch: 20 }, { wch: 25 }, { wch: 30 }, { wch: 18 }, { wch: 18 }, { wch: 40 }, { wch: 15 }
+                    ];
+
+                    XLSX.utils.book_append_sheet(wb, ws, course.title.substring(0, 31));
+                }
+
+                const summaryRows = [
+                    ['Course', 'Total Students', 'Module Students', 'Cycle Students']
+                ];
+                for (let courseKey in courseData) {
+                    const course = courseData[courseKey];
+                    if (!course) continue;
+                    const moduleStudents = course.students.filter(s => s.module !== undefined).length;
+                    const cycleStudents = course.students.filter(s => s.cycle).length;
+                    summaryRows.push([
+                        course.title,
+                        course.students.length,
+                        moduleStudents,
+                        cycleStudents
+                    ]);
+                }
+                const summaryWs = XLSX.utils.aoa_to_sheet(summaryRows);
+                summaryWs['!cols'] = [{ wch: 30 }, { wch: 18 }, { wch: 18 }, { wch: 18 }];
+                XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
+
+                const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                const blob = new Blob([wbout], { type: 'application/octet-stream' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `portfolio_data_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                document.getElementById('dataStatus').textContent = '✅ Excel exported successfully!';
+            } catch (e) {
+                console.error('Export error:', e);
+                alert('Error exporting data: ' + e.message);
+            }
+        }
+
+        // ========== EXCEL IMPORT ==========
+        function importFromExcel(event) {
+            if (userRole === 'trainer') { alert('Trainers cannot import data.'); return; }
+
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+
+                    let importedCount = 0;
+                    let errors = [];
+
+                    workbook.SheetNames.forEach(sheetName => {
+                        if (sheetName === 'Summary') return;
+
+                        const ws = workbook.Sheets[sheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(ws);
+                        if (jsonData.length === 0) return;
+
+                        let matchedCourseKey = null;
+                        for (let key in courseData) {
+                            if (courseData[key].title === sheetName) {
+                                matchedCourseKey = key;
+                                break;
+                            }
+                        }
+                        if (!matchedCourseKey) {
+                            errors.push(`No matching course found for sheet: "${sheetName}"`);
+                            return;
+                        }
+
+                        const course = courseData[matchedCourseKey];
+                        course.students = [];
+
+                        jsonData.forEach(row => {
+                            const studentId = String(row['Student ID'] || '').trim();
+                            const studentName = String(row['Student Name'] || '').trim();
+                            if (!studentId || !studentName) return;
+
+                            const student = {
+                                id: studentId,
+                                name: studentName,
+                                email: String(row['Email'] || '').trim() ||
+                                    `${studentName.toLowerCase().replace(/ /g, '.')}@example.com`,
+                                phone: String(row['Phone'] || '').trim() || '+254 700 000 000',
+                                portfolioLink: String(row['Portfolio Link'] || '').trim() || '',
+                                lastUpdated: Date.now()
+                            };
+
+                            const moduleCycle = String(row['Module/Cycle'] || '').trim();
+                            if (moduleCycle.includes('Module')) {
+                                const match = moduleCycle.match(/Module (\d+)/);
+                                if (match) student.module = parseInt(match[1]);
+                                else student.module = 1;
+                            } else if (moduleCycle.includes('Cycle One')) {
+                                student.cycle = 'cycle1';
+                            } else if (moduleCycle.includes('Cycle Two')) {
+                                student.cycle = 'cycle2';
+                            } else {
+                                student.module = 1;
+                            }
+
+                            course.students.push(student);
+                            importedCount++;
+                        });
+                    });
+
+                    if (errors.length > 0) {
+                        alert(`Import completed with ${importedCount} students imported.\n\nErrors:\n${errors.join('\n')}`);
+                    } else {
+                        await saveData();
+                        renderCourse(currentCourseKey);
+                        updateCourseBadge();
+                        document.getElementById('dataStatus').textContent =
+                            `✅ Imported ${importedCount} students from Excel!`;
+                        alert(`Successfully imported ${importedCount} students!`);
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    alert('Error importing Excel file: ' + err.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            event.target.value = '';
+        }
+
+        // ========== USER MANAGEMENT ==========
+        async function showUserManagement() {
+            if (userRole !== 'admin') { alert('Only Admin can manage users.'); return; }
+            await loadUsersFromFirebase();
+            renderUsersTable();
+            document.getElementById('userModal').style.display = 'block';
+            document.getElementById('userMessage').textContent = '';
+            document.getElementById('newUserEmail').value = '';
+            document.getElementById('newUserName').value = '';
+            document.getElementById('newUserPassword').value = '';
+            document.getElementById('newUserPortfolioLink').value = '';
+        }
+
+        function closeUserModal() { document.getElementById('userModal').style.display = 'none'; }
+
+        function renderUsersTable() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            for (let email in allUsers) {
+                const user = allUsers[email];
+                const portfolioLink = user.portfolioLink || '';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                        <td>${email}</td>
+                        <td>${user.name}</td>
+                        <td><span class="status-badge" style="background:${user.role === 'admin' ? '#003366' : user.role === 'hod' ? '#ff9800' : '#1a73e8'};color:white;">${user.role.toUpperCase()}</span></td>
+                        <td><span class="status-badge ${user.status === 'active' ? 'active' : 'inactive'}">${user.status.toUpperCase()}</span></td>
+                        <td>${portfolioLink ? `<a href="${portfolioLink}" target="_blank" style="color:#1a73e8;text-decoration:none;">🔗 Link</a>` : '-'}</td>
+                        <td class="actions">
+                            ${user.role !== 'admin' ? `
+                                <button class="btn-sm btn-edit" onclick="toggleUserStatus('${email}')">${user.status === 'active' ? '🔒 Deactivate' : '✅ Activate'}</button>
+                                <button class="btn-sm btn-delete" onclick="deleteUser('${email}')">🗑️ Delete</button>
+                            ` : '<span style="color:#999;font-size:12px;">Protected</span>'}
+                        </td>
+                    `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        async function addUser() {
+            const email = document.getElementById('newUserEmail').value.trim();
+            const name = document.getElementById('newUserName').value.trim();
+            const password = document.getElementById('newUserPassword').value.trim();
+            const portfolioLink = document.getElementById('newUserPortfolioLink').value.trim();
+            const role = document.getElementById('newUserRole').value;
+            const messageDiv = document.getElementById('userMessage');
+
+            if (!email || !name || !password) { messageDiv.style.color = '#dc3545';
+                messageDiv.textContent = '❌ Please fill in all required fields!'; return; }
+            if (allUsers[email]) { messageDiv.style.color = '#dc3545';
+                messageDiv.textContent = '❌ User with this email already exists!'; return; }
+
+            allUsers[email] = { password: password, role: role, name: name, status: 'active', portfolioLink: portfolioLink ||
+                    '' };
+            await saveUsersToFirebase();
+            messageDiv.style.color = '#28a745';
+            messageDiv.textContent = `✅ User ${name} (${email}) added successfully as ${role.toUpperCase()}!`;
+            renderUsersTable();
+            document.getElementById('newUserEmail').value = '';
+            document.getElementById('newUserName').value = '';
+            document.getElementById('newUserPassword').value = '';
+            document.getElementById('newUserPortfolioLink').value = '';
+        }
+
+        async function toggleUserStatus(email) {
+            if (!confirm(`Are you sure you want to ${allUsers[email].status === 'active' ? 'deactivate' : 'activate'} this user?`))
+                return;
+            allUsers[email].status = allUsers[email].status === 'active' ? 'inactive' : 'active';
+            await saveUsersToFirebase();
+            renderUsersTable();
+        }
+
+        async function deleteUser(email) {
+            if (!confirm(`Are you sure you want to delete user ${email}? This action cannot be undone.`)) return;
+            delete allUsers[email];
+            await saveUsersToFirebase();
+            renderUsersTable();
+        }
+
+        // ========== UNIT MANAGEMENT ==========
+        function toggleAddUnitForm() {
+            if (userRole === 'trainer') return;
+            const form = document.getElementById('addUnitForm');
+            form.classList.toggle('active');
+            if (form.classList.contains('active')) {
+                const course = courseData[currentCourseKey];
+                document.getElementById('currentCourseNameUnit').textContent = course ? course.title : '';
+                document.getElementById('addUnitMessage').textContent = '';
+                const courseKey = currentCourseKey;
+                const module = document.getElementById('unitModule').value;
+                const units = courseData[courseKey]?.units[module] || [];
+                const codes = units.map(u => u.code);
+                let nextNum = 1;
+                while (codes.includes(`ICT-${String(nextNum).padStart(3, '0')}`)) nextNum++;
+                document.getElementById('unitCode').value = `ICT-${String(nextNum).padStart(3, '0')}`;
+            }
+        }
+
+        async function addUnit() {
+            if (userRole === 'trainer') { alert('Trainers cannot add units.'); return; }
+            const unitCode = document.getElementById('unitCode').value.trim();
+            const unitName = document.getElementById('unitName').value.trim();
+            const module = document.getElementById('unitModule').value;
+            const messageDiv = document.getElementById('addUnitMessage');
+
+            if (!unitCode || !unitName) { messageDiv.style.color = '#dc3545';
+                messageDiv.textContent = '❌ Please fill in both Unit Code and Unit Name!'; return; }
+            const course = courseData[currentCourseKey];
+            if (!course) return;
+            if (course.units[module] && course.units[module].some(u => u.code === unitCode)) {
+                messageDiv.style.color = '#dc3545';
+                messageDiv.textContent = '❌ Unit with this code already exists in this module!';
+                return;
+            }
+            if (!course.units[module]) { course.units[module] = []; }
+            const enrolled = course.students.filter(s => s.module === parseInt(module)).length;
+            if (enrolled > 0 && !confirm(
+                    `This module has ${enrolled} students enrolled. Adding a unit will affect them. Continue?`))
+            return;
+            course.units[module].push({ code: unitCode, name: unitName, module: parseInt(module) });
+            await saveData();
+            document.getElementById('unitCode').value = '';
+            document.getElementById('unitName').value = '';
+            messageDiv.style.color = '#28a745';
+            messageDiv.textContent = `✅ Unit ${unitCode} - ${unitName} added successfully to Module ${module}!`;
+            renderCourse(currentCourseKey);
+            populateUnitDropdown();
+        }
+
+        async function deleteUnit(courseKey, module, unitCode) {
+            if (userRole === 'trainer') { alert('Trainers cannot delete units.'); return; }
+            const course = courseData[courseKey];
+            if (!course) return;
+            const enrolled = course.students.filter(s => s.module === parseInt(module)).length;
+            if (enrolled > 0 && !confirm(
+                    `This unit has ${enrolled} students enrolled in Module ${module}. Deleting it will affect them. Continue?`
+                    )) return;
+            if (!confirm(`Are you sure you want to delete unit ${unitCode}?`)) return;
+            const index = course.units[module].findIndex(u => u.code === unitCode);
+            if (index !== -1) { course.units[module].splice(index, 1);
+                await saveData();
+                renderCourse(courseKey);
+                populateUnitDropdown(); }
+        }
+
+        // ========== TRAINER ASSIGNMENT ==========
+        async function showTrainerAssignment() {
+            if (userRole === 'trainer') { alert('Trainers cannot manage assignments.'); return; }
+            await loadUsersFromFirebase();
+            await loadTrainerAssignments();
+            const trainerSelect = document.getElementById('assignmentTrainer');
+            trainerSelect.innerHTML = '<option value="">Select Trainer</option>';
+            const trainers = [];
+            for (let email in allUsers) {
+                if (allUsers[email].role === 'trainer' && allUsers[email].status === 'active') {
+                    const count = Object.keys(trainerAssignments[email] || {}).length;
+                    trainers.push({ email, name: allUsers[email].name, count });
+                }
+            }
+            trainers.sort((a, b) => a.count - b.count);
+            trainers.forEach(t => {
+                const option = document.createElement('option');
+                option.value = t.email;
+                option.textContent = `${t.name} (${t.email}) - ${t.count} courses`;
+                trainerSelect.appendChild(option);
+            });
+            renderAssignmentTable();
+            document.getElementById('assignmentModal').style.display = 'block';
+            document.getElementById('assignmentMessage').textContent = '';
+            populateUnitDropdown();
+        }
+
+        function closeAssignmentModal() { document.getElementById('assignmentModal').style.display = 'none'; }
+
+        function renderAssignmentTable() {
+            const tbody = document.getElementById('assignmentTableBody');
+            tbody.innerHTML = '';
+            for (let trainerEmail in trainerAssignments) {
+                const trainer = allUsers[trainerEmail];
+                if (!trainer) continue;
+                const assignments = trainerAssignments[trainerEmail];
+                for (let courseKey in assignments) {
+                    const course = courseData[courseKey];
+                    if (!course) continue;
+                    const details = assignments[courseKey] || {};
+                    const modules = details.modules || [];
+                    const units = details.units || [];
+                    let display = '';
+                    if (modules.includes('all')) display += 'All Modules';
+                    else if (modules.length) display += modules.map(m => `M${m}`).join(', ');
+                    if (units.length) {
+                        const unitNames = units.map(u => {
+                            const found = courseData[courseKey]?.units?.[modules[0]]?.find(unit => unit
+                            .code === u);
+                            return found ? `${u}` : u;
+                        });
+                        display += display ? ` | Units: ${unitNames.join(', ')}` : `Units: ${unitNames.join(', ')}`;
+                    }
+                    if (!display) display = 'All';
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                            <td>${trainer.name}</td>
+                            <td>${course.title}</td>
+                            <td><span class="module-badge">${display}</span></td>
+                            <td><button class="btn-remove-assign" onclick="removeAssignment('${trainerEmail}','${courseKey}')">🗑️ Remove</button></td>
+                        `;
+                    tbody.appendChild(tr);
+                }
+            }
+            if (tbody.children.length === 0) {
+                tbody.innerHTML =
+                    `<tr><td colspan="4" style="text-align:center;padding:20px;color:#999;">No assignments yet. Select a trainer and assign them to courses above.</td></tr>`;
+            }
+        }
+
+        async function assignTrainer() {
+            const trainerEmail = document.getElementById('assignmentTrainer').value;
+            const courseKey = document.getElementById('assignmentCourse').value;
+            const moduleValue = document.getElementById('assignmentModule').value;
+            const unitValue = document.getElementById('assignmentUnit').value;
+            const messageDiv = document.getElementById('assignmentMessage');
+
+            if (!trainerEmail || !courseKey) { messageDiv.style.color = '#dc3545';
+                messageDiv.textContent = '❌ Please select both Trainer and Course!'; return; }
+            if (!trainerAssignments[trainerEmail]) { trainerAssignments[trainerEmail] = {}; }
+            if (!trainerAssignments[trainerEmail][courseKey]) { trainerAssignments[trainerEmail][courseKey] = { modules: [],
+                    units: [] }; }
+
+            const courseCount = Object.keys(trainerAssignments[trainerEmail]).length;
+            if (courseCount >= 4 && !confirm(
+                    `This trainer already has ${courseCount} courses assigned. Assign another?`)) return;
+
+            const assignment = trainerAssignments[trainerEmail][courseKey];
+            if (moduleValue === 'all') {
+                assignment.modules = ['all'];
+                assignment.units = [];
+            } else {
+                const moduleNum = parseInt(moduleValue);
+                if (!assignment.modules.includes(moduleNum)) {
+                    assignment.modules.push(moduleNum);
+                }
+                if (unitValue !== 'all' && !assignment.units.includes(unitValue)) {
+                    assignment.units.push(unitValue);
+                } else if (unitValue === 'all') {
+                    const course = courseData[courseKey];
+                    if (course && course.units[moduleNum]) {
+                        course.units[moduleNum].forEach(u => {
+                            if (!assignment.units.includes(u.code)) assignment.units.push(u.code);
+                        });
+                    }
+                }
+            }
+            await saveTrainerAssignments();
+            messageDiv.style.color = '#28a745';
+            messageDiv.textContent = '✅ Assignment added successfully!';
+            renderAssignmentTable();
+            if (userRole === 'trainer' && currentUser.email === trainerEmail) { filterTrainerCourses();
+                switchCourse(); }
+            const course = courseData[courseKey];
+            if (course) {
+                if (!trainerStudentAssignments[trainerEmail]) trainerStudentAssignments[trainerEmail] = [];
+                course.students.forEach(s => {
+                    if (!trainerStudentAssignments[trainerEmail].includes(s.id)) {
+                        trainerStudentAssignments[trainerEmail].push(s.id);
+                    }
+                });
+                await saveTrainerStudentAssignments();
+            }
+        }
+
+        async function removeAssignment(trainerEmail, courseKey) {
+            if (!confirm(`Remove this assignment?`)) return;
+            if (trainerAssignments[trainerEmail] && trainerAssignments[trainerEmail][courseKey]) {
+                delete trainerAssignments[trainerEmail][courseKey];
+                if (Object.keys(trainerAssignments[trainerEmail]).length === 0) { delete trainerAssignments[
+                    trainerEmail]; }
+                await saveTrainerAssignments();
+                renderAssignmentTable();
+                if (userRole === 'trainer' && currentUser.email === trainerEmail) { filterTrainerCourses();
+                    switchCourse(); }
+                if (trainerStudentAssignments[trainerEmail]) {
+                    const course = courseData[courseKey];
+                    if (course) {
+                        course.students.forEach(s => {
+                            const idx = trainerStudentAssignments[trainerEmail].indexOf(s.id);
+                            if (idx !== -1) trainerStudentAssignments[trainerEmail].splice(idx, 1);
+                        });
+                        await saveTrainerStudentAssignments();
+                    }
+                }
+            }
+        }
+
+        // ========== TRAINER PORTFOLIOS ==========
+        function showTrainerPortfolios() {
+            if (userRole === 'trainer') { alert('Trainers cannot view this page.'); return; }
+            loadFromFirestore().then(() => { renderTrainerPortfoliosTable();
+                document.getElementById('trainerPortfoliosModal').style.display = 'block'; });
+        }
+
+        function closeTrainerPortfoliosModal() { document.getElementById('trainerPortfoliosModal').style.display = 'none'; }
+
+        function renderTrainerPortfoliosTable() {
+            const tbody = document.getElementById('trainerPortfoliosTableBody');
+            tbody.innerHTML = '';
+            const trainers = [];
+            for (let email in allUsers) {
+                if (allUsers[email].role === 'trainer' && allUsers[email].status === 'active') {
+                    trainers.push({ email: email, name: allUsers[email].name, ...allUsers[email] });
+                }
+            }
+            if (trainers.length === 0) {
+                tbody.innerHTML =
+                    `<tr><td colspan="5" style="text-align:center;padding:30px;color:#999;">No trainers have been added yet.</td></tr>`;
+                return;
+            }
+            trainers.forEach(trainer => {
+                const tr = document.createElement('tr');
+                const assignedStudents = trainerStudentAssignments[trainer.email] || [];
+                const studentCount = assignedStudents.length;
+                const courseCount = trainerAssignments[trainer.email] ? Object.keys(trainerAssignments[trainer
+                    .email]).length : 0;
+                let totalProgress = 0,
+                    progCount = 0;
+                for (let courseKey in courseData) {
+                    const course = courseData[courseKey];
+                    course.students.forEach(s => {
+                        if (assignedStudents.includes(s.id) && s.module !== undefined) {
+                            totalProgress += s.module;
+                            progCount++;
+                        }
+                    });
+                }
+                const avgProgress = progCount > 0 ? Math.round((totalProgress / (progCount * 7)) * 100) : 0;
+                const isIdle = studentCount === 0;
+                tr.innerHTML = `
+                        <td><strong>${trainer.name}</strong> ${isIdle ? '<span class="stalled-badge">IDLE</span>' : ''}</td>
+                        <td>${trainer.email}</td>
+                        <td>
+                            <span class="student-count">${studentCount} Students</span>
+                            <br><small style="color:#666;font-size:11px;">${courseCount} Courses</small>
+                            ${trainer.portfolioLink ? `<br><a href="${trainer.portfolioLink}" target="_blank" style="color:#1a73e8;font-size:11px;">🔗 Portfolio Link</a>` : ''}
+                        </td>
+                        <td>${avgProgress}%</td>
+                        <td>
+                            <button class="btn-view-trainer" onclick="viewTrainerStudents('${trainer.email}')">📋 View Portfolio</button>
+                            <button class="btn-view-portfolio-link" onclick="viewTrainerOwnPortfolio('${trainer.email}')">🎯 Trainer Portfolio</button>
+                        </td>
+                    `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ========== ENHANCED: VIEW TRAINER STUDENTS GROUPED BY CLASS ==========
+        function viewTrainerStudents(trainerEmail) {
+            // Get all students assigned to this trainer
+            const assignedStudentIds = trainerStudentAssignments[trainerEmail] || [];
+            const trainerAssign = trainerAssignments[trainerEmail] || {};
+
+            // Group students by course
+            const groupedByClass = {};
+            for (let courseKey in courseData) {
+                const course = courseData[courseKey];
+                if (!course) continue;
+                const courseStudents = course.students.filter(s => assignedStudentIds.includes(s.id));
+                if (courseStudents.length === 0) continue;
+                groupedByClass[courseKey] = {
+                    title: course.title,
+                    level: course.level,
+                    students: courseStudents.map(s => ({ ...s, courseKey: courseKey }))
+                };
+            }
+
+            const now = Date.now();
+            const trainer = allUsers[trainerEmail];
+            const trainerName = trainer ? trainer.name : trainerEmail;
+
+            // Build HTML
+            let html = `
+                <div class="trainer-portfolio-summary">
+                    <strong>👨‍🏫 Trainer:</strong> ${trainerName} (${trainerEmail})
+                    ${trainer && trainer.portfolioLink ? `<br><a href="${trainer.portfolioLink}" target="_blank" style="color:#1a73e8;">🔗 Trainer Portfolio Link</a>` : ''}
+                    <br><strong>Total Students:</strong> <span class="stat-badge">${assignedStudentIds.length}</span>
+                    <strong>Classes:</strong> <span class="stat-badge">${Object.keys(groupedByClass).length}</span>
+                    <br><strong>Assigned Courses & Modules:</strong>
+                    ${Object.keys(trainerAssign).map(cKey => {
+                        const c = courseData[cKey];
+                        const details = trainerAssign[cKey] || {};
+                        const mods = details.modules || [];
+                        const units = details.units || [];
+                        let modDisplay = mods.includes('all') ? 'All Modules' : mods.map(m => `M${m}`).join(', ');
+                        let unitDisplay = units.length ? `Units: ${units.join(', ')}` : '';
+                        return c ? `<div class="assignment-detail">${c.title} - ${modDisplay} ${unitDisplay ? '| '+unitDisplay : ''}</div>` : '';
+                    }).join('') || 'None assigned'}
+                </div>
+                <hr>
+            `;
+
+            // Sort classes by title
+            const sortedClassKeys = Object.keys(groupedByClass).sort((a, b) =>
+                groupedByClass[a].title.localeCompare(groupedByClass[b].title)
+            );
+
+            if (sortedClassKeys.length === 0) {
+                html += '<p style="color:#999;padding:20px;text-align:center;">No students assigned to this trainer.</p>';
+            } else {
+                sortedClassKeys.forEach(classKey => {
+                    const group = groupedByClass[classKey];
+                    // Sort students: stalled first, then by name
+                    const students = group.students.sort((a, b) => {
+                        const aStalled = a.module === 1 && (now - (a.lastUpdated || 0)) > 30 * 24 * 60 *
+                            60 * 1000;
+                        const bStalled = b.module === 1 && (now - (b.lastUpdated || 0)) > 30 * 24 * 60 *
+                            60 * 1000;
+                        if (aStalled && !bStalled) return -1;
+                        if (!aStalled && bStalled) return 1;
+                        return a.name.localeCompare(b.name);
+                    });
+
+                    html += `
+                        <div class="trainer-portfolio-class-group">
+                            <div class="class-header">
+                                <span>📚 ${group.title} (${group.level})</span>
+                                <span class="class-count">${students.length} Student${students.length !== 1 ? 's' : ''}</span>
+                            </div>
+                            <div class="class-students">
+                    `;
+
+                    students.forEach(s => {
+                        const program = s.module !== undefined ? `Module ${s.module}/7` :
+                            s.cycle === 'cycle1' ? 'Cycle One' : 'Cycle Two';
+                        const portfolioLink = s.portfolioLink || '#';
+                        const isStalled = s.module === 1 && (now - (s.lastUpdated || 0)) > 30 * 24 * 60 *
+                            60 * 1000;
+
+                        html += `
+                            <div class="student-item" style="border-left-color: ${isStalled ? '#dc3545' : '#1a73e8'};">
+                                <div class="student-detail">
+                                    <strong>${s.name}</strong> (${s.id})
+                                    <small>${program}</small>
+                                    ${isStalled ? ' <span class="stalled-badge">⚠️ Needs Attention</span>' : ''}
+                                </div>
+                                <div class="student-actions">
+                                    ${portfolioLink !== '#' ? `<a href="${portfolioLink}" target="_blank" class="portfolio-link-btn" style="padding:4px 12px; font-size:12px;">🔗 Portfolio</a>` : ''}
+                                    <button class="btn-portfolio" onclick="showPortfolio('${s.courseKey}','${s.id}')" style="padding:4px 12px; font-size:12px;">📁 Details</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += `</div></div>`;
+                });
+            }
+
+            closeTrainerPortfoliosModal();
+            document.getElementById('modalTitle').textContent = `📋 ${trainerName}'s Students (by Class)`;
+            document.getElementById('modalBody').innerHTML = html;
+            document.getElementById('portfolioModal').style.display = 'block';
+        }
+
+        function viewTrainerOwnPortfolio(trainerEmail) {
+            const trainer = allUsers[trainerEmail];
+            if (!trainer) return;
+            const assignments = trainerAssignments[trainerEmail] || {};
+            const courseCount = Object.keys(assignments).length;
+            const studentCount = (trainerStudentAssignments[trainerEmail] || []).length;
+            let html = `
+                    <div style="margin-bottom: 15px; padding: 10px; background: #e3f2fd; border-radius: 6px;">
+                        <h3>👨‍🏫 ${trainer.name}'s Portfolio</h3>
+                        <p><strong>Email:</strong> ${trainerEmail}</p>
+                        <p><strong>Role:</strong> ${trainer.role.toUpperCase()}</p>
+                        <p><strong>Status:</strong> ${trainer.status.toUpperCase()}</p>
+                        ${trainer.portfolioLink ? `<p><strong>Portfolio Link:</strong> <a href="${trainer.portfolioLink}" target="_blank" style="color:#1a73e8;">🔗 ${trainer.portfolioLink}</a></p>` : ''}
+                    </div>
+                    <hr>
+                    <div style="margin-top:15px;">
+                        <p><strong>Assigned Students:</strong> ${studentCount}</p>
+                        <p><strong>Courses Assigned:</strong> ${courseCount}</p>
+                        <p><strong>Details:</strong></p>
+                        ${Object.keys(assignments).map(courseKey => {
+                            const course = courseData[courseKey];
+                            const details = assignments[courseKey] || {};
+                            const modules = details.modules || [];
+                            const units = details.units || [];
+                            let modDisplay = modules.includes('all') ? 'All Modules' : modules.map(m => `M${m}`).join(', ');
+                            let unitDisplay = units.length ? `Units: ${units.join(', ')}` : '';
+                            return course ? `<div class="assignment-detail">${course.title} - ${modDisplay} ${unitDisplay ? '| '+unitDisplay : ''}</div>` : '';
+                        }).join('') || 'None assigned'}
+                    </div>
+                    <div style="margin-top:15px;text-align:center;padding:20px;background:#f8f9fa;border-radius:6px;">
+                        <p style="color:#666;">Trainer portfolio details - manage your students effectively.</p>
+                        <button class="btn-view-trainer" onclick="viewTrainerStudents('${trainerEmail}')" style="margin-top:10px;">📋 View Your Students</button>
+                    </div>
+                `;
+            closeTrainerPortfoliosModal();
+            document.getElementById('modalTitle').textContent = `🎯 ${trainer.name}'s Portfolio`;
+            document.getElementById('modalBody').innerHTML = html;
+            document.getElementById('portfolioModal').style.display = 'block';
+        }
+
+        // ============================================================
+        // ========== ENHANCED TRAINER DASHBOARD ==========
+        // ============================================================
+        function renderTrainerDashboard() {
+            if (userRole !== 'trainer') {
+                console.log('⚠️ Not a trainer, skipping dashboard render');
+                return;
+            }
+
+            const trainerEmail = currentUser.email;
+            const assignments = trainerAssignments[trainerEmail] || {};
+            const assignedStudents = trainerStudentAssignments[trainerEmail] || [];
+
+            console.log('📊 Rendering Trainer Dashboard for:', trainerEmail);
+            console.log('📋 Assignments:', assignments);
+            console.log('👨‍🎓 Assigned Students:', assignedStudents);
+
+            let totalStudents = 0;
+            let totalModules = 0;
+            let totalUnits = 0;
+            let courseCount = Object.keys(assignments).length;
+
+            // Get dashboard container
+            const dashboard = document.getElementById('trainerDashboard');
+            if (!dashboard) {
+                console.error('❌ Trainer dashboard container not found!');
+                return;
+            }
+
+            let dashboardHtml = `
+                <div class="dashboard-header">
+                    <h2>👨‍🏫 Welcome, ${currentUser.name}!</h2>
+                    <p>Here's an overview of your assigned courses and students</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="number">${courseCount}</div>
+                        <div class="label">📚 Courses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="trainerTotalStudents">${assignedStudents.length}</div>
+                        <div class="label">👨‍🎓 Total Students</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="trainerTotalModules">0</div>
+                        <div class="label">📖 Modules</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="trainerTotalUnits">0</div>
+                        <div class="label">📄 Units</div>
+                    </div>
+                </div>
+                <div class="courses-section">
+                    <h3>📋 Your Assigned Courses</h3>
+            `;
+
+            let moduleCount = 0;
+            let unitCount = 0;
+
+            const sortedCourses = Object.keys(assignments).sort((a, b) => {
+                return (courseData[a]?.title || a).localeCompare(courseData[b]?.title || b);
+            });
+
+            if (sortedCourses.length === 0) {
+                dashboardHtml += `
+                    <div style="text-align:center;padding:40px;color:#999;background:#f8f9fa;border-radius:8px;">
+                        <p style="font-size:16px;">📭 No courses assigned to you yet.</p>
+                        <p style="font-size:13px;margin-top:8px;">Contact your administrator to get course assignments.</p>
+                    </div>
+                `;
+            } else {
+                sortedCourses.forEach(courseKey => {
+                    const course = courseData[courseKey];
+                    if (!course) {
+                        console.warn('⚠️ Course data not found for:', courseKey);
+                        return;
+                    }
+
+                    const courseAssign = assignments[courseKey] || {};
+                    const modules = courseAssign.modules || [];
+                    const units = courseAssign.units || [];
+                    const isAllModules = modules.includes('all');
+
+                    const courseStudents = course.students.filter(s => assignedStudents.includes(s.id));
+                    const studentCount = courseStudents.length;
+                    totalStudents += studentCount;
+
+                    dashboardHtml += `
+                        <div class="trainer-course-card">
+                            <div class="course-head" onclick="toggleCourse(this)">
+                                <span>📚 ${course.title} (${course.level})</span>
+                                <span>
+                                    <span class="course-badge">${studentCount} Students</span>
+                                    <span class="arrow-icon">▶</span>
+                                </span>
+                            </div>
+                            <div class="course-body">
+                    `;
+
+                    if (isAllModules) {
+                        for (let m = 1; m <= 7; m++) {
+                            const moduleStudents = courseStudents.filter(s => s.module === m);
+                            const moduleUnits = course.units[m] || [];
+                            if (moduleStudents.length === 0 && moduleUnits.length === 0) continue;
+                            moduleCount++;
+                            unitCount += moduleUnits.length;
+
+                            dashboardHtml += `
+                                <div class="trainer-module-block">
+                                    <div class="module-head" onclick="toggleModule(this)">
+                                        <span>📖 Module ${m}</span>
+                                        <span>
+                                            <span class="module-badge">${moduleStudents.length} Students</span>
+                                            <span class="arrow-icon">▶</span>
+                                        </span>
+                                    </div>
+                                    <div class="module-body">
+                            `;
+
+                            if (moduleUnits.length > 0) {
+                                moduleUnits.forEach(unit => {
+                                    dashboardHtml += `
+                                        <div class="trainer-unit-row">
+                                            <span class="unit-code">${unit.code}</span>
+                                            <span class="unit-name">${unit.name}</span>
+                                            <span class="unit-student-count" onclick="showUnitStudents('${courseKey}', ${m}, '${unit.code}')">
+                                                👥 ${moduleStudents.length}
+                                            </span>
+                                        </div>
+                                    `;
+                                });
+                            } else {
+                                dashboardHtml += `<div style="color:#999;padding:4px 0;font-size:13px;">No units assigned</div>`;
+                            }
+
+                            // Show students
+                            if (moduleStudents.length > 0) {
+                                dashboardHtml += `
+                                    <div style="margin-top:10px;border-top:1px solid #e9ecef;padding-top:8px;">
+                                        <div style="font-size:13px;color:#666;margin-bottom:6px;font-weight:500;">👨‍🎓 Students in Module ${m}:</div>
+                                `;
+                                moduleStudents.forEach(s => {
+                                    const link = s.portfolioLink || '#';
+                                    const isStalled = s.module === 1 && (Date.now() - (s.lastUpdated || 0)) > 30 * 24 * 60 * 60 * 1000;
+                                    dashboardHtml += `
+                                        <div class="trainer-student-item" style="border-left-color: ${isStalled ? '#dc3545' : '#1a73e8'};">
+                                            <span>
+                                                <span class="student-name">${s.name}</span>
+                                                <span class="student-id">(${s.id})</span>
+                                                ${isStalled ? ' <span class="stalled-badge">⚠️</span>' : ''}
+                                            </span>
+                                            <span class="student-actions">
+                                                ${link !== '#' ? `<a href="${link}" target="_blank" class="btn-sm" style="background:#9c27b0;color:white;padding:2px 10px;border-radius:3px;text-decoration:none;font-size:11px;">🔗 Portfolio</a>` : ''}
+                                                <button class="btn-sm btn-portfolio" onclick="showPortfolio('${courseKey}','${s.id}')" style="padding:2px 10px;font-size:11px;">📁 Details</button>
+                                            </span>
+                                        </div>
+                                    `;
+                                });
+                                dashboardHtml += `</div>`;
+                            }
+
+                            dashboardHtml += `</div></div>`;
+                        }
+                    } else {
+                        modules.forEach(m => {
+                            const moduleStudents = courseStudents.filter(s => s.module === m);
+                            const moduleUnits = course.units[m] || [];
+                            let filteredUnits = moduleUnits;
+                            if (units.length > 0) {
+                                filteredUnits = moduleUnits.filter(u => units.includes(u.code));
+                            }
+                            if (moduleStudents.length === 0 && filteredUnits.length === 0) return;
+                            moduleCount++;
+                            unitCount += filteredUnits.length;
+
+                            dashboardHtml += `
+                                <div class="trainer-module-block">
+                                    <div class="module-head" onclick="toggleModule(this)">
+                                        <span>📖 Module ${m}</span>
+                                        <span>
+                                            <span class="module-badge">${moduleStudents.length} Students</span>
+                                            <span class="arrow-icon">▶</span>
+                                        </span>
+                                    </div>
+                                    <div class="module-body">
+                            `;
+
+                            if (filteredUnits.length > 0) {
+                                filteredUnits.forEach(unit => {
+                                    dashboardHtml += `
+                                        <div class="trainer-unit-row">
+                                            <span class="unit-code">${unit.code}</span>
+                                            <span class="unit-name">${unit.name}</span>
+                                            <span class="unit-student-count" onclick="showUnitStudents('${courseKey}', ${m}, '${unit.code}')">
+                                                👥 ${moduleStudents.length}
+                                            </span>
+                                        </div>
+                                    `;
+                                });
+                            } else {
+                                dashboardHtml += `<div style="color:#999;padding:4px 0;font-size:13px;">No units assigned</div>`;
+                            }
+
+                            if (moduleStudents.length > 0) {
+                                dashboardHtml += `
+                                    <div style="margin-top:10px;border-top:1px solid #e9ecef;padding-top:8px;">
+                                        <div style="font-size:13px;color:#666;margin-bottom:6px;font-weight:500;">👨‍🎓 Students in Module ${m}:</div>
+                                `;
+                                moduleStudents.forEach(s => {
+                                    const link = s.portfolioLink || '#';
+                                    const isStalled = s.module === 1 && (Date.now() - (s.lastUpdated || 0)) > 30 * 24 * 60 * 60 * 1000;
+                                    dashboardHtml += `
+                                        <div class="trainer-student-item" style="border-left-color: ${isStalled ? '#dc3545' : '#1a73e8'};">
+                                            <span>
+                                                <span class="student-name">${s.name}</span>
+                                                <span class="student-id">(${s.id})</span>
+                                                ${isStalled ? ' <span class="stalled-badge">⚠️</span>' : ''}
+                                            </span>
+                                            <span class="student-actions">
+                                                ${link !== '#' ? `<a href="${link}" target="_blank" class="btn-sm" style="background:#9c27b0;color:white;padding:2px 10px;border-radius:3px;text-decoration:none;font-size:11px;">🔗 Portfolio</a>` : ''}
+                                                <button class="btn-sm btn-portfolio" onclick="showPortfolio('${courseKey}','${s.id}')" style="padding:2px 10px;font-size:11px;">📁 Details</button>
+                                            </span>
+                                        </div>
+                                    `;
+                                });
+                                dashboardHtml += `</div>`;
+                            }
+
+                            dashboardHtml += `</div></div>`;
+                        });
+                    }
+
+                    dashboardHtml += `</div></div>`;
+                });
+            }
+
+            // Update stats
+            const totalModulesEl = document.getElementById('trainerTotalModules');
+            const totalUnitsEl = document.getElementById('trainerTotalUnits');
+            const totalStudentsEl = document.getElementById('trainerTotalStudents');
+
+            if (totalModulesEl) totalModulesEl.textContent = moduleCount;
+            if (totalUnitsEl) totalUnitsEl.textContent = unitCount;
+            if (totalStudentsEl) totalStudentsEl.textContent = totalStudents;
+
+            dashboardHtml += `</div>`;
+            dashboard.innerHTML = dashboardHtml;
+            dashboard.style.display = 'block';
+            console.log('✅ Trainer Dashboard rendered successfully!');
+        }
+
+        // ===== Toggle functions for trainer dashboard =====
+        function toggleCourse(element) {
+            const body = element.nextElementSibling;
+            const arrow = element.querySelector('.arrow-icon');
+            body.classList.toggle('open');
+            if (arrow) arrow.classList.toggle('open');
+        }
+
+        function toggleModule(element) {
+            const body = element.nextElementSibling;
+            const arrow = element.querySelector('.arrow-icon');
+            body.classList.toggle('open');
+            if (arrow) arrow.classList.toggle('open');
+        }
+
+        // ===== Show students for a specific unit =====
+        function showUnitStudents(courseKey, module, unitCode) {
+            const course = courseData[courseKey];
+            if (!course) return;
+
+            const trainerEmail = currentUser.email;
+            const assignedStudents = trainerStudentAssignments[trainerEmail] || [];
+
+            const students = course.students.filter(s =>
+                assignedStudents.includes(s.id) && s.module === module
+            );
+
+            const unit = course.units[module]?.find(u => u.code === unitCode);
+            const unitName = unit ? `${unit.code} - ${unit.name}` : unitCode;
+
+            const popup = document.getElementById('studentPopup');
+            const popupTitle = document.getElementById('popupTitle');
+            const popupBody = document.getElementById('popupBody');
+
+            popupTitle.textContent = `👨‍🎓 ${unitName} - Students (${students.length})`;
+
+            let html = '';
+            if (students.length === 0) {
+                html = '<p style="color:#999;padding:20px;text-align:center;">No students in this unit.</p>';
+            } else {
+                students.forEach(s => {
+                    const link = s.portfolioLink || '#';
+                    const isStalled = s.module === 1 && (Date.now() - (s.lastUpdated || 0)) > 30 * 24 * 60 * 60 * 1000;
+                    html += `
+                        <div class="student-row" style="border-left-color: ${isStalled ? '#dc3545' : '#1a73e8'};">
+                            <div class="student-info">
+                                <strong>${s.name}</strong> (${s.id})
+                                <small>Module ${s.module}/7</small>
+                                ${isStalled ? ' <span class="stalled-badge">⚠️ Needs Attention</span>' : ''}
+                            </div>
+                            <div class="student-actions">
+                                ${link !== '#' ? `<a href="${link}" target="_blank" class="portfolio-link-btn" style="padding:2px 10px;font-size:11px;">🔗 Portfolio</a>` : ''}
+                                <button class="btn-portfolio" onclick="showPortfolio('${courseKey}','${s.id}');" style="padding:2px 10px;font-size:11px;">📁 Details</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            popupBody.innerHTML = html;
+            popup.style.display = 'block';
+        }
+
+        function closeStudentPopup() {
+            document.getElementById('studentPopup').style.display = 'none';
+        }
+
+        // ===== FIXED: Only close when clicking the X button or using closeModal =====
+        // No window.onclick for modal closing - only explicit close functions
+
+        // ========== TRAINER AUTOMATIONS ==========
+        function generateTrainerDigest() {
+            if (userRole !== 'trainer') return;
+            const trainerEmail = currentUser.email;
+            const assignedStudents = trainerStudentAssignments[trainerEmail] || [];
+            let moduleCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
+            let stalledCount = 0;
+            const now = Date.now();
+            for (let courseKey in courseData) {
+                const course = courseData[courseKey];
+                course.students.forEach(s => {
+                    if (assignedStudents.includes(s.id) && s.module !== undefined) {
+                        moduleCounts[s.module] = (moduleCounts[s.module] || 0) + 1;
+                        if ((now - (s.lastUpdated || 0)) > 30 * 24 * 60 * 60 * 1000) stalledCount++;
+                    }
+                });
+            }
+            const digest = Object.entries(moduleCounts).map(([m, c]) => `Module ${m}: ${c} students`).join(', ');
+            const digestDiv = document.createElement('div');
+            digestDiv.className = 'trainer-digest';
+            digestDiv.innerHTML =
+                `<strong>📊 Trainer Digest:</strong> ${digest} | <strong>Stalled (30+ days):</strong> ${stalledCount} students`;
+            const existing = document.querySelector('.trainer-digest');
+            if (existing) existing.replaceWith(digestDiv);
+            else document.querySelector('.trainer-dashboard').after(digestDiv);
+        }
+
+        function checkForNewStudents() {
+            if (userRole !== 'trainer') return;
+            const trainerEmail = currentUser.email;
+            const assignedStudents = trainerStudentAssignments[trainerEmail] || [];
+            const now = Date.now();
+            let newStudents = [];
+            for (let courseKey in courseData) {
+                const course = courseData[courseKey];
+                course.students.forEach(s => {
+                    if (assignedStudents.includes(s.id) && s.lastUpdated && (now - s.lastUpdated) < 60000) {
+                        newStudents.push(s.name);
+                    }
+                });
+            }
+            if (newStudents.length > 0) {
+                inAppBanner.innerHTML = `🆕 New student(s) added to your course: ${newStudents.join(', ')}`;
+                inAppBanner.classList.add('show');
+                setTimeout(() => inAppBanner.classList.remove('show'), 10000);
+            }
+        }
+
+        // ========== CORE FUNCTIONS ==========
+        async function addStudent() {
+            if (userRole === 'trainer') { alert('Trainers cannot add students.'); return; }
+            const studentId = document.getElementById('studentId').value.trim();
+            const studentName = document.getElementById('studentName').value.trim();
+            const cycle = document.getElementById('studentCycle').value;
+            const portfolioLink = document.getElementById('studentPortfolioLink').value.trim();
+            const messageDiv = document.getElementById('addMessage');
+
+            if (!studentId || !studentName) { messageDiv.style.color = '#dc3545';
+                messageDiv.textContent = '❌ Please fill in both Admission Number and Name!'; return; }
+            const course = courseData[currentCourseKey];
+            if (!course) return;
+            if (course.students.some(s => s.name.toLowerCase() === studentName.toLowerCase())) {
+                if (!confirm(`A student with name "${studentName}" already exists. Add anyway?`)) return;
+            }
+            if (course.students.some(s => s.id === studentId)) { messageDiv.style.color = '#dc3545';
+                messageDiv.textContent = '❌ Student with this Admission Number already exists!'; return; }
+
+            let defaultCycle = cycle;
+            if (cycle === 'module' && course.students.some(s => s.cycle)) {
+                defaultCycle = course.students.some(s => s.cycle === 'cycle1') ? 'cycle1' : 'cycle2';
+            }
+
+            const newStudent = { id: studentId, name: studentName,
+                email: `${studentName.toLowerCase().replace(/ /g, '.')}@example.com`, phone: '+254 700 000 000',
+                lastUpdated: Date.now() };
+            if (portfolioLink) { newStudent.portfolioLink = portfolioLink; }
+            if (defaultCycle === 'module') { newStudent.module = 1; } else { newStudent.cycle = defaultCycle; }
+            course.students.push(newStudent);
+            await saveData();
+            document.getElementById('studentId').value = '';
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentPortfolioLink').value = '';
+            const cycleLabel = defaultCycle === 'module' ? 'Module 1' : defaultCycle === 'cycle1' ? 'Cycle One' :
+                'Cycle Two';
+            messageDiv.style.color = '#28a745';
+            messageDiv.textContent = `✅ Student ${studentName} (${studentId}) added successfully to ${cycleLabel}!`;
+            renderCourse(currentCourseKey);
+            updateCourseBadge();
+            notifyTrainersOfNewStudent(newStudent, currentCourseKey);
+        }
+
+        async function notifyTrainersOfNewStudent(student, courseKey) {
+            const assignedTrainers = [];
+            for (let email in trainerAssignments) {
+                if (trainerAssignments[email][courseKey]) assignedTrainers.push(email);
+            }
+            for (let email of assignedTrainers) {
+                if (!trainerStudentAssignments[email]) trainerStudentAssignments[email] = [];
+                if (!trainerStudentAssignments[email].includes(student.id)) {
+                    trainerStudentAssignments[email].push(student.id);
+                }
+            }
+            await saveTrainerStudentAssignments();
+        }
+
+        async function deleteStudent(courseKey, studentId) {
+            if (userRole === 'trainer') { alert('Trainers cannot delete students.'); return; }
+            if (!confirm(`Are you sure you want to archive student ${studentId}? (Can be restored)`)) return;
+            const course = courseData[courseKey];
+            if (!course) { alert('Error: Course not found.'); return; }
+            const index = course.students.findIndex(s => s.id === studentId);
+            if (index === -1) { alert('Student not found.'); return; }
+            const deletedStudent = course.students.splice(index, 1)[0];
+            archivedStudents.push({ ...deletedStudent, courseKey, archivedAt: Date.now() });
+            await saveArchivedStudents();
+            for (let trainerEmail in trainerStudentAssignments) {
+                const idx = trainerStudentAssignments[trainerEmail].indexOf(studentId);
+                if (idx !== -1) { trainerStudentAssignments[trainerEmail].splice(idx, 1); }
+            }
+            await saveTrainerStudentAssignments();
+            renderCourse(courseKey);
+            document.getElementById('dataStatus').textContent = `📦 Archived student: ${deletedStudent.name}`;
+            await saveData();
+            updateCourseBadge();
+        }
+
+        async function batchAdvanceStudents() {
+            if (userRole === 'trainer') { alert('Trainers cannot batch advance.'); return; }
+            const moduleNum = parseInt(prompt('Enter module number to advance (e.g., 3):'));
+            if (isNaN(moduleNum) || moduleNum < 1 || moduleNum > 7) return;
+            const course = courseData[currentCourseKey];
+            if (!course) return;
+            const candidates = course.students.filter(s => s.module === moduleNum);
+            if (candidates.length === 0) { alert('No students in this module.'); return; }
+            if (!confirm(`Advance ${candidates.length} students from Module ${moduleNum} to ${moduleNum+1}?`)) return;
+            candidates.forEach(s => {
+                if (s.module < 7) {
+                    s.module++;
+                    s.lastUpdated = Date.now();
+                    progressLog.push({ studentId: s.id, name: s.name, fromModule: moduleNum, toModule: s
+                            .module, timestamp: Date.now(), by: currentUser.email });
+                }
+            });
+            await saveProgressLog();
+            await saveData();
+            renderCourse(currentCourseKey);
+            document.getElementById('dataStatus').textContent = `✅ Batch advanced ${candidates.length} students.`;
+        }
+
+        function toggleAddStudentForm() {
+            if (userRole === 'trainer') return;
+            const form = document.getElementById('addStudentForm');
+            form.classList.toggle('active');
+            if (form.classList.contains('active')) {
+                const course = courseData[currentCourseKey];
+                document.getElementById('currentCourseName').textContent = course ? course.title : '';
+                document.getElementById('addMessage').textContent = '';
+                if (course && course.students.some(s => s.cycle)) {
+                    document.getElementById('studentCycle').value = 'cycle1';
+                }
+            }
+        }
+
+        function createStudentCard(courseKey, student, type) {
+            const cycleLabel = type === 'cycle1' ? 'Cycle One' : 'Cycle Two';
+            const isTrainer = userRole === 'trainer';
+            const isStalled = student.module === 1 && (Date.now() - (student.lastUpdated || 0)) > 30 * 24 * 60 * 60 * 1000;
+            return `
+                  <div class="student" style="border-left-color: ${isStalled ? '#dc3545' : '#6c757d'};" data-student-id="${student.id}">
+                    <div class="student-info">
+                      <strong>${student.id}</strong> - ${student.name}
+                      <span style="background:#6c757d;color:white;padding:2px 10px;border-radius:12px;font-size:12px;">${cycleLabel}</span>
+                      ${isStalled ? '<span class="stalled-badge">⏳ Stalled</span>' : ''}
+                    </div>
+                    <div>
+                      <button class="btn-portfolio" onclick="showPortfolio('${courseKey}','${student.id}')">📁 Portfolio</button>
+                      ${!isTrainer ? `<button class="btn-delete" onclick="deleteStudent('${courseKey}','${student.id}')">🗑️ Archive</button>` : ''}
+                    </div>
+                  </div>
+                `;
+        }
+
+        function renderUnits(courseKey, module) {
+            const course = courseData[courseKey];
+            if (!course || !course.units || !course.units[module]) return '';
+            const units = course.units[module] || [];
+            const isTrainer = userRole === 'trainer';
+            if (units.length === 0) {
+                return `<div style="color:#999;padding:5px 0;font-size:13px;">No units added for this module.</div>`;
+            }
+            let html = `<div class="units-section"><h4>📚 Units in this Module (${units.length})</h4>`;
+            units.forEach(unit => {
+                html += `
+                        <div class="unit-item">
+                            <div><span class="unit-code">${unit.code}</span> <span class="unit-name">${unit.name}</span></div>
+                            ${!isTrainer ? `<button class="btn-delete-unit" onclick="deleteUnit('${courseKey}', ${module}, '${unit.code}')">🗑️ Remove</button>` : ''}
+                        </div>
+                    `;
+            });
+            html += `</div>`;
+            return html;
+        }
+
+        function createStudentElement(courseKey, actualStudent) {
+            const div = document.createElement("div");
+            div.className = "student";
+            div.dataset.studentId = actualStudent.id;
+            const left = document.createElement("div");
+            left.className = "student-info";
+            const isStalled = actualStudent.module === 1 && (Date.now() - (actualStudent.lastUpdated || 0)) > 30 * 24 * 60 *
+                60 * 1000;
+            left.innerHTML =
+                `<strong>${actualStudent.id}</strong> - ${actualStudent.name}${isStalled ? ' <span class="stalled-badge">⏳ Stalled</span>' : ''}`;
+            const actions = document.createElement("div");
+
+            const registered = document.createElement("button");
+            registered.innerHTML = "REGISTERED";
+            registered.className = "btn-registered";
+            registered.onclick = async function() {
+                if (userRole === 'trainer') { alert('Trainers cannot modify student progress.'); return; }
+                if (actualStudent.module < 7) {
+                    actualStudent.module++;
+                    actualStudent.lastUpdated = Date.now();
+                    progressLog.push({ studentId: actualStudent.id, name: actualStudent.name,
+                        fromModule: actualStudent.module - 1, toModule: actualStudent.module,
+                        timestamp: Date.now(), by: currentUser.email });
+                    await saveProgressLog();
+                    await saveData();
+                    renderCourse(courseKey);
+                }
+            };
+
+            const notRegistered = document.createElement("button");
+            notRegistered.innerHTML = "NOT YET REGISTERED";
+            notRegistered.className = "btn-not-registered";
+            notRegistered.onclick = async function() {
+                if (userRole === 'trainer') { alert('Trainers cannot modify student progress.'); return; }
+                if (actualStudent.module > 1) {
+                    actualStudent.module--;
+                    actualStudent.lastUpdated = Date.now();
+                    progressLog.push({ studentId: actualStudent.id, name: actualStudent.name,
+                        fromModule: actualStudent.module + 1, toModule: actualStudent.module,
+                        timestamp: Date.now(), by: currentUser.email });
+                    await saveProgressLog();
+                    await saveData();
+                    renderCourse(courseKey);
+                }
+            };
+
+            const portfolioBtn = document.createElement("button");
+            portfolioBtn.innerHTML = "📁 Portfolio";
+            portfolioBtn.className = "btn-portfolio";
+            portfolioBtn.onclick = function() { showPortfolio(courseKey, actualStudent.id); };
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.innerHTML = "🗑️ Archive";
+            deleteBtn.className = "btn-delete";
+            deleteBtn.onclick = function() { deleteStudent(courseKey, actualStudent.id); };
+
+            if (actualStudent.module === 1) { notRegistered.disabled = true;
+                notRegistered.style.background = "#999"; }
+            if (actualStudent.module === 7) { registered.disabled = true;
+                registered.style.background = "#999"; }
+
+            if (userRole === 'trainer') { actions.appendChild(portfolioBtn); } else {
+                actions.appendChild(registered);
+                actions.appendChild(notRegistered);
+                actions.appendChild(portfolioBtn);
+                actions.appendChild(deleteBtn);
+            }
+
+            div.appendChild(left);
+            div.appendChild(actions);
+            return div;
+        }
+
+        function renderCourse(courseKey) {
+            const container = document.getElementById(courseKey);
+            if (!container) return;
+
+            if (userRole === 'trainer') {
+                const trainerEmail = currentUser.email;
+                const assignments = trainerAssignments[trainerEmail] || {};
+                if (!assignments[courseKey]) {
+                    container.innerHTML = `
+                            <div style="text-align:center;padding:40px;color:#999;">
+                                <h3>🔒 Access Restricted</h3>
+                                <p>You don't have access to this course.</p>
+                                <p style="font-size:13px;margin-top:10px;">Please contact your administrator for access.</p>
+                            </div>
+                        `;
+                    return;
+                }
+            }
+
+            const data = courseData[courseKey];
+            if (!data) { container.innerHTML = '<p style="color:#999;padding:20px;">Course not found</p>'; return; }
+
+            let html = '';
+            let trainerModules = [];
+            if (userRole === 'trainer') {
+                const trainerEmail = currentUser.email;
+                const assignments = trainerAssignments[trainerEmail] || {};
+                if (assignments[courseKey]) { trainerModules = assignments[courseKey].modules || []; }
+            }
+
+            const cycle1Students = data.students.filter(s => s.cycle === 'cycle1');
+            const cycle2Students = data.students.filter(s => s.cycle === 'cycle2');
+            const moduleStudents = data.students.filter(s => s.module !== undefined);
+
+            if (userRole !== 'trainer' || trainerModules.includes('all') || trainerModules.includes('cycle1')) {
+                html += `
+                      <div class="legacy-section">
+                        <div class="legacy-header" onclick="toggleLegacy('${courseKey}-cycle1')">
+                          <span>📋 1. CYCLE ONE <span class="count">(${cycle1Students.length} Students)</span></span>
+                          <span class="arrow" id="${courseKey}-cycle1-arrow">▶</span>
+                        </div>
+                        <div class="legacy-content collapsed" id="${courseKey}-cycle1">
+                    `;
+                if (cycle1Students.length === 0) { html += `<p style="color:#999;padding:10px;">No students in Cycle One</p>`; } else {
+                    cycle1Students.forEach(student => { html += createStudentCard(courseKey, student, 'cycle1'); }); }
+                html += `</div></div>`;
+            }
+
+            if (userRole !== 'trainer' || trainerModules.includes('all') || trainerModules.includes('cycle2')) {
+                html += `
+                      <div class="legacy-section">
+                        <div class="legacy-header" onclick="toggleLegacy('${courseKey}-cycle2')">
+                          <span>📋 2. CYCLE TWO <span class="count">(${cycle2Students.length} Students)</span></span>
+                          <span class="arrow" id="${courseKey}-cycle2-arrow">▶</span>
+                        </div>
+                        <div class="legacy-content collapsed" id="${courseKey}-cycle2">
+                    `;
+                if (cycle2Students.length === 0) { html += `<p style="color:#999;padding:10px;">No students in Cycle Two</p>`; } else {
+                    cycle2Students.forEach(student => { html += createStudentCard(courseKey, student, 'cycle2'); }); }
+                html += `</div></div>`;
+            }
+
+            for (let m = 1; m <= 7; m++) {
+                if (userRole === 'trainer' && !trainerModules.includes('all') && !trainerModules.includes(m)) continue;
+                const studentsInModule = moduleStudents.filter(s => s.module === m);
+                const count = studentsInModule.length;
+                html += `
+                    <details>
+                      <summary>
+                        ${m === 1 && (userRole !== 'trainer' || trainerModules.includes('all') || trainerModules.includes(1)) ? '3. ' : ''} Module ${m}
+                        <span class="count">(${count} Students)</span>
+                      </summary>
+                      <div class="content" id="${courseKey}-module${m}">
+                        ${renderUnits(courseKey, m)}
+                        <div id="${courseKey}-module${m}-students"></div>
+                      </div>
+                    </details>
+                  `;
+            }
+
+            container.innerHTML = html;
+
+            for (let m = 1; m <= 7; m++) {
+                if (userRole === 'trainer' && !trainerModules.includes('all') && !trainerModules.includes(m)) continue;
+                const contentDiv = document.getElementById(`${courseKey}-module${m}`);
+                if (!contentDiv) continue;
+                const studentsContainer = document.getElementById(`${courseKey}-module${m}-students`);
+                if (!studentsContainer) continue;
+                const moduleStudentsList = data.students.filter(s => s.module === m);
+                moduleStudentsList.forEach((student) => { studentsContainer.appendChild(createStudentElement(courseKey,
+                        student)); });
+            }
+            if (userRole !== 'trainer') {
+                const batchBtn = document.createElement('button');
+                batchBtn.textContent = '📦 Batch Advance Students';
+                batchBtn.className = 'nav-btn add-student';
+                batchBtn.onclick = batchAdvanceStudents;
+                batchBtn.style.marginTop = '10px';
+                container.prepend(batchBtn);
+            }
+            generateTrainerDigest();
+        }
+
+        function toggleLegacy(id) {
+            const content = document.getElementById(id);
+            const arrow = document.getElementById(id + '-arrow');
+            if (content) { content.classList.toggle('collapsed'); if (arrow) arrow.classList.toggle('collapsed'); }
+        }
+
+        function showPortfolio(courseKey, studentId) {
+            const data = courseData[courseKey];
+            if (!data) return;
+            const student = data.students.find(s => s.id === studentId);
+            if (!student) return;
+            const modal = document.getElementById('portfolioModal');
+            document.getElementById('modalTitle').textContent = `📁 ${student.name}'s Portfolio`;
+            document.getElementById('pId').textContent = student.id;
+            document.getElementById('pName').textContent = student.name;
+            document.getElementById('pCourse').textContent = data.title;
+            document.getElementById('pLevel').textContent = data.level;
+
+            if (student.module !== undefined) {
+                document.getElementById('pModule').textContent = `Module ${student.module} of 7`;
+                document.getElementById('pStatus').textContent = student.module === 7 ? '✅ Completed' : '🔄 In Progress';
+                document.getElementById('pProgress').textContent = `${Math.round((student.module / 7) * 100)}%`;
+            } else if (student.cycle) {
+                document.getElementById('pModule').textContent = student.cycle === 'cycle1' ? 'Cycle One' : 'Cycle Two';
+                document.getElementById('pStatus').textContent = '📋 Legacy Program';
+                document.getElementById('pProgress').textContent = 'N/A';
+            }
+            const portfolioLink = student.portfolioLink || '#';
+            document.getElementById('pPortfolioLink').innerHTML = portfolioLink !== '#' ?
+                `<a href="${portfolioLink}" target="_blank" class="portfolio-link-btn">🔗 Open Portfolio</a>` :
+                'No portfolio link provided';
+            modal.style.display = 'block';
+        }
+
+        // ========== UPDATED: GROUP STUDENTS PER CLASS ==========
+        function showAllPortfolios() {
+            // Group students by course
+            const grouped = {};
+            for (let key in courseData) {
+                const course = courseData[key];
+                if (!course || !course.students || course.students.length === 0) continue;
+                grouped[key] = {
+                    title: course.title,
+                    level: course.level,
+                    students: course.students.map(s => ({ ...s, courseKey: key }))
+                };
+            }
+
+            const now = Date.now();
+            let html = '<h3>📚 All Student Portfolios (Grouped by Class)</h3><hr>';
+
+            // Sort courses by title
+            const sortedKeys = Object.keys(grouped).sort((a, b) => grouped[a].title.localeCompare(grouped[b].title));
+
+            if (sortedKeys.length === 0) {
+                html +=
+                    '<p style="color:#999;padding:20px;text-align:center;">No students added yet. Click "Add Student" to get started!</p>';
+            } else {
+                sortedKeys.forEach(key => {
+                    const group = grouped[key];
+                    // Sort students: stalled first, then by name
+                    const students = group.students.sort((a, b) => {
+                        const aStalled = a.module === 1 && (now - (a.lastUpdated || 0)) > 30 * 24 * 60 *
+                            60 * 1000;
+                        const bStalled = b.module === 1 && (now - (b.lastUpdated || 0)) > 30 * 24 * 60 *
+                            60 * 1000;
+                        if (aStalled && !bStalled) return -1;
+                        if (!aStalled && bStalled) return 1;
+                        return a.name.localeCompare(b.name);
+                    });
+
+                    html += `
+                            <div style="margin-top: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+                                <div style="background: #003366; color: white; padding: 12px 20px; font-weight: bold; font-size: 16px;">
+                                    ${group.title} (${group.level}) 
+                                    <span style="background: rgba(255,255,255,0.2); padding: 2px 12px; border-radius: 12px; font-size: 13px; margin-left: 10px;">
+                                        ${students.length} Student${students.length !== 1 ? 's' : ''}
+                                    </span>
+                                </div>
+                                <div style="padding: 15px 20px; max-height: 400px; overflow-y: auto;">
+                        `;
+
+                    if (students.length === 0) {
+                        html += '<p style="color:#999;padding:10px 0;">No students in this class.</p>';
+                    } else {
+                        students.forEach(s => {
+                            const program = s.module !== undefined ? `Module ${s.module}/7` :
+                                s.cycle === 'cycle1' ? 'Cycle One' : 'Cycle Two';
+                            const portfolioLink = s.portfolioLink || '#';
+                            const isStalled = s.module === 1 && (now - (s.lastUpdated || 0)) > 30 *
+                                24 * 60 * 60 * 1000;
+                            html += `
+                                    <div style="padding: 10px 12px; margin: 6px 0; background: #f9f9f9; border-radius: 5px; 
+                                                border-left: 4px solid ${isStalled ? '#dc3545' : '#1a73e8'}; 
+                                                display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                                        <div>
+                                            <strong>${s.name}</strong> (${s.id})
+                                            <br><small style="color:#666;">${program}</small>
+                                            ${isStalled ? ' <span class="stalled-badge">⚠️ Needs Attention</span>' : ''}
+                                        </div>
+                                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                            ${portfolioLink !== '#' ? `<a href="${portfolioLink}" target="_blank" class="portfolio-link-btn" style="padding:4px 12px; font-size:12px;">🔗 Portfolio</a>` : ''}
+                                            <button class="btn-portfolio" onclick="showPortfolio('${s.courseKey}','${s.id}')" style="padding:4px 12px; font-size:12px;">📁 Details</button>
+                                        </div>
+                                    </div>
+                                `;
+                        });
+                    }
+
+                    html += `</div></div>`;
+                });
+            }
+
+            document.getElementById('modalTitle').textContent = '📋 All Student Portfolios (by Class)';
+            document.getElementById('modalBody').innerHTML = html;
+            document.getElementById('portfolioModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('portfolioModal').style.display = 'none';
+        }
+
+        // ===== FIXED: No automatic closing on background click =====
+        // Removed window.onclick for modal closing
+
+        function switchCourse() {
+            const dropdown = document.getElementById('courseDropdown');
+            const selected = dropdown.value;
+            currentCourseKey = selected;
+            const course = courseData[selected];
+            if (course) {
+                document.getElementById('currentCourseName').textContent = course.title;
+                document.getElementById('currentCourseNameUnit').textContent = course.title;
+            }
+            document.querySelectorAll('.course-container').forEach(c => c.classList.remove('active'));
+            const activeContainer = document.getElementById(selected);
+            if (activeContainer) { activeContainer.classList.add('active');
+                renderCourse(selected); }
+            document.getElementById('addStudentForm').classList.remove('active');
+            document.getElementById('addUnitForm').classList.remove('active');
+        }
+
+        // ========== HOD AUTOMATIONS ==========
+        function sortCourseDropdownByAttention() {
+            if (userRole !== 'hod' && userRole !== 'admin') return;
+            const dropdown = document.getElementById('courseDropdown');
+            const options = Array.from(dropdown.options);
+            options.sort((a, b) => {
+                const courseA = courseData[a.value];
+                const courseB = courseData[b.value];
+                const stalledA = courseA ? courseA.students.filter(s => s.module === 1 && (Date.now() - (s
+                    .lastUpdated || 0)) > 30 * 24 * 60 * 60 * 1000).length : 0;
+                const stalledB = courseB ? courseB.students.filter(s => s.module === 1 && (Date.now() - (s
+                    .lastUpdated || 0)) > 30 * 24 * 60 * 60 * 1000).length : 0;
+                return stalledB - stalledA;
+            });
+            dropdown.innerHTML = '';
+            options.forEach(opt => dropdown.appendChild(opt));
+        }
+
+        function updateCourseBadge() {
+            if (userRole !== 'hod' && userRole !== 'admin') return;
+            let total = 0;
+            for (let key in courseData) {
+                total += courseData[key].students.length;
+            }
+            document.getElementById('courseBadge').textContent = `👥 Total: ${total} students`;
+        }
+
+        // ========== START ==========
+        document.getElementById('loginPage').style.display = 'flex';
+        document.getElementById('appPage').classList.remove('active');
+        loadUsersFromFirebase();
+        loadTrainerAssignments();
+        loadTrainerStudentAssignments();
+        loadProgressLog();
+        loadArchivedStudents();
+
+        // Pre-fill login with sample credentials
+        document.getElementById('loginEmail').value = 'admin@example.com';
+        document.getElementById('loginPassword').value = 'admin123';
+    </script>
+</body>
+</html>
